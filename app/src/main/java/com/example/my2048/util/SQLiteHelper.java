@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.example.my2048.OnSQLiteHelperListener;
 import com.example.my2048.OnSQLiteOpenHelperListener;
+import com.example.my2048.RankistAIDL;
 import com.example.my2048.util.SQLiteOpenHelper;
 
 import java.io.File;
@@ -161,6 +162,7 @@ public final class SQLiteHelper implements OnSQLiteOpenHelperListener {
         }
         return sqLiteHelper;
     }
+
 
     /**
      * 设置数据库助手监听

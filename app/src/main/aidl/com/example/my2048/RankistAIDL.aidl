@@ -4,5 +4,5 @@ package com.example.my2048;
 
 interface RankistAIDL{
     String getScore();
-    void sendScore(String score);
+    void sendScore(String score, String player);
 }

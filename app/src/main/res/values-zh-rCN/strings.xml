@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">2048</string>
+    <string name="game_start">开始游戏</string>
+    <string name="game_continue">继续游戏</string>
+    <string name="Current_score">当前得分</string>
+    <string name="Best_score">最高得分</string>
+    <string name="restart">重新开始</string>
+    <string name="game_setting">"设置 "</string>
+</resources>

@@ -1,11 +1,15 @@
 package com.example.my2048;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.GestureDetector;
@@ -43,17 +47,35 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private AlertDialog dialog;
     private Button alertRestart, alert_retrun;
     private SoundPool soundPool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 5);
+    private RankistAIDL mRank;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         SoundPlayUtils.init(this);
-        initView();
+        try {
+            initView();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         initGesture();
+        Intent intent = new Intent("com.example.my2048.service");
+        intent.setPackage("com.example.my2048");
+        bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder service) {
+                if (mRank == null){
+                    mRank = RankistAIDL.Stub.asInterface(service);
+                }
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+            }
+        },BIND_AUTO_CREATE);
     }
 
-    private void initView() {
+    private void initView() throws RemoteException {
         mNowScore = (TextView) findViewById(R.id.now_score);
         mBestScore = (TextView) findViewById(R.id.best_score);
         reset = (Button) findViewById(R.id.reset);
@@ -79,14 +101,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         alertRestart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                initData();
+                try {
+                    initData();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 dialog.dismiss();
             }
         });
         zymBtn = (Button) findViewById(R.id.zym_btn);
         zymBtn.setOnClickListener(this);
     }
-    private void initData() {
+    private void initData() throws RemoteException {
         MySorce = 0;
         name = new int[][]{{R.id.id_00, R.id.id_01, R.id.id_02, R.id.id_03}, {R.id.id_10, R.id.id_11, R.id.id_12, R.id.id_13},
                 {R.id.id_20, R.id.id_21, R.id.id_22, R.id.id_23}, {R.id.id_30, R.id.id_31, R.id.id_32, R.id.id_33}};
@@ -105,7 +131,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         setNum();
     }
 
+    private void saveGame(){
 
+    }
     private void initGesture() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -121,7 +149,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     }
-                    setNum();
+                    setnum();
                     return true;
                 }
                 if (e2.getX() - e1.getX() > time) {
@@ -132,7 +160,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     }
-                    setNum();
+                    setnum();
                     return true;
                 }
                 if (e1.getY() - e2.getY() > time) {
@@ -143,7 +171,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     }
-                    setNum();
+                    setnum();
                     return true;
                 }
                 if (e2.getY() - e1.getY() > time) {
@@ -154,7 +182,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     }
-                    setNum();
+                    setnum();
                     return true;
                 }
                 return false;
@@ -193,7 +221,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
     }
-
     private void setRight(int i, int j) {
         sign2:
         for (int h = 0; h < 4; h++) {
@@ -236,8 +263,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
-
     private void setUp(int i, int j) {
         sign3:
         for (int h = 0; h < 4; h++) {
@@ -277,7 +302,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
     private void setDonw(int i, int j) {
         sign4:
         for (int h = 0; h < 4; h++) {
@@ -320,39 +344,43 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void setNum() {
+    private void setNum() throws RemoteException {
         int index = getTrueNum();
-        int a = new Random().nextInt(4);
+        int a ;
         int x = new Random().nextInt(4);
         int y = new Random().nextInt(4);
-
         if (index != 16) {
-            while (isOver[x][y]) {
-                x = new Random().nextInt(4);
-                y = new Random().nextInt(4);
-
-            }
-            TextView textView = findViewById(name[x][y]);
-            isOver[x][y] = true;
-            if (a < 2) {
-                textView.setText(2 + "");
-                textView.setBackgroundResource(R.drawable.text_2);
-                Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                textView.setAnimation(animation);
-                textView.startAnimation(animation);
-
-            } else {
-                textView.setText(4 + "");
-                textView.setBackgroundResource(R.drawable.text_4);
-                Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                textView.setAnimation(animation);
-                textView.startAnimation(animation);
-            }
-        } else {
+                a = new Random().nextInt(4);
+                while (isOver[x][y]) {
+                    x = new Random().nextInt(4);
+                    y = new Random().nextInt(4);
+                }
+                TextView textView = findViewById(name[x][y]);
+                isOver[x][y] = true;
+                if (a < 2) {
+                    textView.setText(2 + "");
+                    textView.setBackgroundResource(R.drawable.text_2);
+                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
+                    textView.setAnimation(animation);
+                    textView.startAnimation(animation);
+                } else {
+                    textView.setText(4 + "");
+                    textView.setBackgroundResource(R.drawable.text_4);
+                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
+                    textView.setAnimation(animation);
+                    textView.startAnimation(animation);
+                }
+        }else {
             dialog.show();
+            mRank.sendScore(mNowScore.toString(),"player");
         }
-
-
+    }
+    private void setnum(){
+        try {
+            setNum();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private int getTrueNum() {
@@ -378,7 +406,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.reset:
-                initData();
+                try {
+                    initData();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 break;
             case R.id.zym_btn:
                 retrunMain();
@@ -523,6 +555,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     private void setScore(TextView ahead) {
         switch (ahead.getText().toString()) {
             case "2":
@@ -588,7 +621,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             for(int i = 0; i < 4; i++){
                 for(int j = 0; j < 4; j++){
-                    
                 }
             }
             finish();

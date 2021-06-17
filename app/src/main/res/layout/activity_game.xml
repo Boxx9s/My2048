@@ -17,7 +17,7 @@
         <Button
             android:layout_width="wrap_content"
             android:id="@+id/reset"
-            android:text="重新开始"
+            android:text="@string/restart"
             android:textSize="18sp"
             android:textColor="#FFF"
             android:background="@drawable/btn_bg"
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content">
             <TextView
                 android:layout_width="wrap_content"
-                android:text="我的分数"
+                android:text="@string/Current_score"
                 android:textSize="18sp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content">
             <TextView
                 android:layout_width="wrap_content"
-                android:text="最高分数"
+                android:text="@string/Best_score"
                 android:textSize="18sp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"

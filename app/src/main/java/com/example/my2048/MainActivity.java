@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
-        startGame = (Button) findViewById(R.id.start_game);
-        continueGame = (Button) findViewById(R.id.continue_game);
+        startGame = (Button) findViewById(R.id.game_start);
+        continueGame = (Button) findViewById(R.id.game_continue);
         startGame.setOnClickListener(this);
         continueGame.setOnClickListener(this);
     }
@@ -57,11 +57,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.start_game:
+            case R.id.game_start:
                 Intent intent =new Intent(MainActivity.this,GameActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.continue_game:
+            case R.id.game_continue:
                 try {
                     Toast.makeText(this,aidl.getScore(),Toast.LENGTH_SHORT).show();
                 } catch (RemoteException e) {
