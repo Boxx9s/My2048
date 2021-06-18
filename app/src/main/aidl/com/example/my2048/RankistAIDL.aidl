@@ -5,4 +5,6 @@ package com.example.my2048;
 interface RankistAIDL{
     String getScore();
     void sendScore(String score, String player);
+    void initSaveGame();
+    void Savegame(int id,boolean isOver, String text);
 }

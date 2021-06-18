@@ -1,20 +1,18 @@
 package com.example.my2048;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.my2048.service.RankService;
+import com.example.my2048.model.*;
+import com.example.my2048.util.SQLiteHelper;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -23,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button continueGame;
     private RankistAIDL aidl;
     private boolean mBound = false;
-
+    private SaveGame mSaveGame;
 
 
     @Override
@@ -62,11 +60,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             case R.id.game_continue:
-                try {
-                    Toast.makeText(this,aidl.getScore(),Toast.LENGTH_SHORT).show();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
                 break;
         }
     }

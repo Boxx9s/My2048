@@ -25,7 +25,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.my2048.model.*;
+import com.example.my2048.util.SQLiteHelper;
 import com.example.my2048.util.SoundPlayUtils;
 
 import java.util.Random;
@@ -48,6 +49,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button alertRestart, alert_retrun;
     private SoundPool soundPool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 5);
     private RankistAIDL mRank;
+    private SaveGame mSaveGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +120,17 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 {R.id.id_20, R.id.id_21, R.id.id_22, R.id.id_23}, {R.id.id_30, R.id.id_31, R.id.id_32, R.id.id_33}};
         isOver = new Boolean[][]{{false, false, false, false}, {false, false, false, false},
                 {false, false, false, false}, {false, false, false, false}};
+        SQLiteHelper.with(this).deleteTable(SaveGame.class);
+        int x , y;
+        mSaveGame = new SaveGame();
+        for (x = 0;x < 4; x++){
+            for(y = 0;y < 4;y++){
+                mSaveGame.setId(name[x][y]);
+                mSaveGame.setText("");
+                mSaveGame.setOver(false);
+                SQLiteHelper.with(this).insert(mSaveGame);
+            }
+        }
         mNowScore.setText("0");
         for (int[] bgs : name) {
             for (int bg : bgs) {
@@ -131,9 +144,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         setNum();
     }
 
-    private void saveGame(){
 
-    }
     private void initGesture() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -349,26 +360,34 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int a ;
         int x = new Random().nextInt(4);
         int y = new Random().nextInt(4);
+        TextView m ;
         if (index != 16) {
-                a = new Random().nextInt(4);
-                while (isOver[x][y]) {
-                    x = new Random().nextInt(4);
-                    y = new Random().nextInt(4);
+            int i , j;
+            for(i = 0; i < 4; i++){
+                for(j = 0; j<4; j++){
+                    m = findViewById(name[i][j]);
+                    mRank.Savegame(name[i][j],isOver[i][j],m.getText().toString());
                 }
-                TextView textView = findViewById(name[x][y]);
-                isOver[x][y] = true;
-                if (a < 2) {
-                    textView.setText(2 + "");
-                    textView.setBackgroundResource(R.drawable.text_2);
-                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                    textView.setAnimation(animation);
-                    textView.startAnimation(animation);
-                } else {
-                    textView.setText(4 + "");
-                    textView.setBackgroundResource(R.drawable.text_4);
-                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                    textView.setAnimation(animation);
-                    textView.startAnimation(animation);
+            }
+            a = new Random().nextInt(4);
+            while (isOver[x][y]) {
+                x = new Random().nextInt(4);
+                y = new Random().nextInt(4);
+            }
+            TextView textView = findViewById(name[x][y]);
+            isOver[x][y] = true;
+            if (a < 2) {
+                textView.setText(2 + "");
+                textView.setBackgroundResource(R.drawable.text_2);
+                Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
+                textView.setAnimation(animation);
+                textView.startAnimation(animation);
+            } else {
+                textView.setText(4 + "");
+                textView.setBackgroundResource(R.drawable.text_4);
+                Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
+                textView.setAnimation(animation);
+                textView.startAnimation(animation);
                 }
         }else {
             dialog.show();
