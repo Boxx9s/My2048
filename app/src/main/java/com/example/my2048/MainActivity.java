@@ -8,40 +8,33 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.my2048.base.MyApplication;
 import com.example.my2048.model.*;
 import com.example.my2048.util.SQLiteHelper;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button startGame;
     private Button continueGame;
-    private RankistAIDL aidl;
     private boolean mBound = false;
     private SaveGame mSaveGame;
-
+    private MyApplication mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        Intent intent = new Intent("com.example.my2048.service");
-        intent.setPackage("com.example.my2048");
-        bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                if (aidl == null){
-                    aidl = RankistAIDL.Stub.asInterface(service);
-                }
-            }
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-            }
-        },BIND_AUTO_CREATE);
+        mp = (MyApplication)getApplication();
     }
 
     private void initView() {
@@ -54,12 +47,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        Intent intent =new Intent(MainActivity.this,GameActivity.class);
         switch (v.getId()) {
             case R.id.game_start:
-                Intent intent =new Intent(MainActivity.this,GameActivity.class);
+                mp.setContiune(false);
                 startActivity(intent);
                 break;
             case R.id.game_continue:
+//                String sql = "select * from " + SaveGame.class.getSimpleName();
+//                List<Map<String, String>> SaveResult = SQLiteHelper.with(this).query(sql);
+//                int a = 1+2;
+                mp.setContiune(true);
+                startActivity(intent);
                 break;
         }
     }

@@ -1,14 +1,11 @@
 package com.example.my2048;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -25,14 +22,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.my2048.base.MyApplication;
 import com.example.my2048.model.*;
 import com.example.my2048.util.SQLiteHelper;
 import com.example.my2048.util.SoundPlayUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG = "GameActivity";
     private final float time = 200;
     private int[][] name;
     private Boolean[][] isOver;
@@ -48,7 +50,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private AlertDialog dialog;
     private Button alertRestart, alert_retrun;
     private SoundPool soundPool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 5);
-    private RankistAIDL mRank;
+    private MyApplication mp;
     private SaveGame mSaveGame;
 
     @Override
@@ -56,25 +58,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         SoundPlayUtils.init(this);
+        mp =(MyApplication)getApplication();
         try {
             initView();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
         initGesture();
-        Intent intent = new Intent("com.example.my2048.service");
-        intent.setPackage("com.example.my2048");
-        bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                if (mRank == null){
-                    mRank = RankistAIDL.Stub.asInterface(service);
-                }
-            }
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-            }
-        },BIND_AUTO_CREATE);
     }
 
     private void initView() throws RemoteException {
@@ -116,32 +106,125 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }
     private void initData() throws RemoteException {
         MySorce = 0;
+        int x , y;
         name = new int[][]{{R.id.id_00, R.id.id_01, R.id.id_02, R.id.id_03}, {R.id.id_10, R.id.id_11, R.id.id_12, R.id.id_13},
                 {R.id.id_20, R.id.id_21, R.id.id_22, R.id.id_23}, {R.id.id_30, R.id.id_31, R.id.id_32, R.id.id_33}};
         isOver = new Boolean[][]{{false, false, false, false}, {false, false, false, false},
                 {false, false, false, false}, {false, false, false, false}};
-        SQLiteHelper.with(this).deleteTable(SaveGame.class);
-        int x , y;
-        mSaveGame = new SaveGame();
-        for (x = 0;x < 4; x++){
-            for(y = 0;y < 4;y++){
-                mSaveGame.setId(name[x][y]);
-                mSaveGame.setText("");
-                mSaveGame.setOver(false);
-                SQLiteHelper.with(this).insert(mSaveGame);
-            }
-        }
         mNowScore.setText("0");
-        for (int[] bgs : name) {
-            for (int bg : bgs) {
-                TextView textView = findViewById(bg);
-                textView.setBackgroundResource(R.drawable.text_bg);
-                textView.setTextColor(Color.BLACK);
-                textView.setText("");
+        mBestScore.setText(sp.getString("mBestScore", 0 + ""));
+        if(!mp.isContiune()){
+            SQLiteHelper.with(this).deleteTable(SaveGame.class.getSimpleName());
+            mSaveGame = new SaveGame();
+            for (x = 0;x < 4; x++){
+                for(y = 0;y < 4;y++){
+                    mSaveGame.setId(name[x][y]);
+                    mSaveGame.setText("");
+                    mSaveGame.setOver(false);
+                    SQLiteHelper.with(this).insert(mSaveGame);
+                }
+            }
+            for (int[] bgs : name) {
+                for (int bg : bgs) {
+                    TextView textView = findViewById(bg);
+                    textView.setBackgroundResource(R.drawable.text_bg);
+                    textView.setTextColor(Color.BLACK);
+                    textView.setText("");
+                }
+            }
+            setNum();
+        }else if(mp.isContiune){
+            String sql = "select * from " + SaveGame.class.getSimpleName();
+            List<Map<String, String>> SaveResult = SQLiteHelper.with(this).query(sql);
+            TextView t;
+            for(x = 0; x < 4; x++){
+                for(y = 0; y < 4; y++){
+                    Map<String, String> map= SaveResult.get((y+1) + (4 * x)-1);
+                    isOver[x][y]= map.get("isOver").equals("true");
+                    t = findViewById(name[x][y]);
+                    t.setText(""+map.get("text"));
+                    switch (t.getText().toString().length()) {
+                        case 1:
+                            t.setTextSize(40);
+                            break;
+                        case 2:
+                            t.setTextSize(40);
+                            break;
+                        case 3:
+                            t.setTextSize(35);
+                            break;
+                        case 4:
+                            t.setTextSize(30);
+                            break;
+                        case 5:
+                            t.setTextSize(25);
+                            break;
+                        case 6:
+                            t.setTextSize(20);
+                            break;
+                        case 7:
+                            t.setTextSize(18);
+                            break;
+                        case 8:
+                            t.setTextSize(16);
+                            break;
+                        case 9:
+                            t.setTextSize(14);
+                            break;
+                        case 10:
+                            t.setTextSize(12);
+                            break;
+                    }
+                    switch (t.getText().toString()) {
+                        case "2":
+                            t.setBackgroundResource(R.drawable.text_2);
+                            t.setTextColor(Color.BLACK);
+                            break;
+                        case "4":
+                            t.setBackgroundResource(R.drawable.text_4);
+                            t.setTextColor(Color.BLACK);
+                            break;
+                        case "8":
+                            t.setBackgroundResource(R.drawable.text_8);
+                            t.setTextColor(Color.BLACK);
+                            break;
+                        case "16":
+                            t.setBackgroundResource(R.drawable.text_16);
+                            t.setTextColor(Color.BLACK);
+                            break;
+                        case "32":
+                            t.setBackgroundResource(R.drawable.text_32);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "64":
+                            t.setBackgroundResource(R.drawable.text_64);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "128":
+                            t.setBackgroundResource(R.drawable.text_128);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "256":
+                            t.setBackgroundResource(R.drawable.text_256);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "512":
+                            t.setBackgroundResource(R.drawable.text_512);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "1024":
+                            t.setBackgroundResource(R.drawable.text_1024);
+                            t.setTextColor(Color.WHITE);
+                            break;
+                        case "2048":
+                            t.setBackgroundResource(R.drawable.text_2048);
+                            t.setTextColor(Color.WHITE);
+                            break;
+
+                    }
+                }
             }
         }
-        mBestScore.setText(sp.getString("mBestScore", 0 + ""));
-        setNum();
     }
 
 
@@ -356,6 +439,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void setNum() throws RemoteException {
+
         int index = getTrueNum();
         int a ;
         int x = new Random().nextInt(4);
@@ -363,12 +447,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         TextView m ;
         if (index != 16) {
             int i , j;
-            for(i = 0; i < 4; i++){
-                for(j = 0; j<4; j++){
-                    m = findViewById(name[i][j]);
-                    mRank.Savegame(name[i][j],isOver[i][j],m.getText().toString());
-                }
-            }
+
             a = new Random().nextInt(4);
             while (isOver[x][y]) {
                 x = new Random().nextInt(4);
@@ -389,9 +468,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 textView.setAnimation(animation);
                 textView.startAnimation(animation);
                 }
+            for(i = 0; i < 4; i++){
+                for(j = 0; j<4; j++){
+                    m = findViewById(name[i][j]);
+                    try {
+                        mp.aidl.Savegame(name[i][j],isOver[i][j],m.getText().toString());
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }else {
             dialog.show();
-            mRank.sendScore(mNowScore.toString(),"player");
+            mp.aidl.sendScore(mNowScore.toString(),"player");
         }
     }
     private void setnum(){

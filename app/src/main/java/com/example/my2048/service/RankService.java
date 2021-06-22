@@ -40,9 +40,6 @@ public class RankService extends Service {
         }
         SaveGame mSaveGame = new SaveGame();
         public void Savegame(int id, boolean isOver, String text){
-            mSaveGame.setId(id);
-            mSaveGame.setOver(isOver);
-            mSaveGame.setText(text);
             String sql = "update " + SaveGame.class.getSimpleName() + " set text = '" +
                     text + "', isOver = '" + isOver + "' where id = " + id;
             SQLiteHelper.with(RankService.this).update(sql);
