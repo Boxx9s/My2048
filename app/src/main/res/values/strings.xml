@@ -6,4 +6,6 @@
     <string name="Best_score">Best score</string>
     <string name="restart">Restart</string>
     <string name="game_setting">Setting</string>
+    <string name="widget_rank">Rank</string>
+    <string name="widget_refresh">Refresh</string>
 </resources>

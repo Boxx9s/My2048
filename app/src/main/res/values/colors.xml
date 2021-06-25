@@ -9,4 +9,9 @@
     <color name="t_16">#6B5523</color>
     <color name="t_32">#F57E5E</color>
     <color name="t_64">#E25D37</color>
+    <color name="light_blue_50">#FFE1F5FE</color>
+    <color name="light_blue_200">#FF81D4FA</color>
+    <color name="light_blue_600">#FFFFFF</color>
+    33000000
+    <color name="light_blue_900">#FF01579B</color>
 </resources>

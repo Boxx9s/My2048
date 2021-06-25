@@ -7,4 +7,6 @@
     <string name="Best_score">最高得分</string>
     <string name="restart">重新开始</string>
     <string name="game_setting">"设置 "</string>
+    <string name="widget_rank">排名</string>
+    <string name="widget_refresh">更新</string>
 </resources>

@@ -19,19 +19,15 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.my2048.base.MyApplication;
 import com.example.my2048.model.*;
 import com.example.my2048.util.SQLiteHelper;
 import com.example.my2048.util.SoundPlayUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "GameActivity";
@@ -220,14 +216,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                             t.setBackgroundResource(R.drawable.text_2048);
                             t.setTextColor(Color.WHITE);
                             break;
-
                     }
                 }
             }
         }
     }
-
-
     private void initGesture() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -283,7 +276,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
     private void setLeft(int i, int j) {
         int h = i;
         sign1:
@@ -322,8 +314,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 for (int w = j; w < 3; w++) {
                     TextView ahead = findViewById(name[h][w + 1]);
                     TextView local = findViewById(name[h][w]);
-
-
                     if (ahead.getText().toString() != "" && ahead.getText().toString().equals(local.getText().toString())) {
                         SoundPlayUtils.play(1);
                         int num = parse(ahead.getText().toString());
@@ -336,27 +326,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ChangStyle(ahead, local);
                         setScore(ahead);
                         break sign2;
-
                     }
-
                     if (ahead.getText().toString() == "") {
-
                         isOver[h][w + 1] = true;
                         isOver[h][w] = false;
-
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-
                         ChangStyle(ahead, local);
-
                     }
                 }
             }
-
-
         }
     }
+
+
     private void setUp(int i, int j) {
         sign3:
         for (int h = 0; h < 4; h++) {
@@ -377,17 +361,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         setScore(ahead);
                         break sign3;
                     }
-
                     if (TextUtils.isEmpty(ahead.getText())) {
-
                         isOver[i - 1][j] = true;
                         isOver[i][j] = false;
-
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
                         ChangStyle(ahead, local);
-
                     }
                     i--;
                 }
