@@ -34,7 +34,6 @@
             android:process=":rank">
             <intent-filter>
                 <action android:name="com.example.my2048.service" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
@@ -48,6 +47,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".GameActivity" />
+        <activity android:name=".SettingActivity" />
+        <service android:name=".service.RankWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
     </application>
 
 </manifest>

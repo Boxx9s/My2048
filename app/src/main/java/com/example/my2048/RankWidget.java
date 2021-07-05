@@ -3,26 +3,30 @@ package com.example.my2048;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
+
+import com.example.my2048.service.RankWidgetService;
 
 /**
  * Implementation of App Widget functionality.
  */
 public class RankWidget extends AppWidgetProvider {
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rank_widget);
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
+
+    private RemoteViews mRv;
+    private Intent mIntent;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            mIntent =  new Intent(context, RankWidgetService.class);
+            mRv = new RemoteViews(context.getPackageName(), R.layout.rank_widget);
+            mRv.setRemoteAdapter(R.id.rank_list, mIntent);
+            mRv.setEmptyView(R.id.rank_list,R.id.widget_empty);
+            manager.updateAppWidget(appWidgetId, mRv);
         }
     }
 

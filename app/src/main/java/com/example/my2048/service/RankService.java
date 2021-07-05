@@ -1,25 +1,27 @@
 package com.example.my2048.service;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.Context;
-import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.widget.TextView;
 
 import com.example.my2048.MainActivity;
 import com.example.my2048.RankistAIDL;
 import com.example.my2048.model.*;
 import com.example.my2048.util.SQLiteHelper;
 
-import org.w3c.dom.Text;
 
+/**
+ * @author zhb
+ */
 public class RankService extends Service {
     private RankistAIDL mRank;
     MainActivity M;
+    SharedPreferences sp;
 
+    @Override
     public void onCreate(){
         super.onCreate();
     }
@@ -34,21 +36,34 @@ public class RankService extends Service {
             score1.setPlayer(player);
             SQLiteHelper.with(RankService.this).insert(score1);
         }
-        @Override
-        public String getScore() throws RemoteException {
-            return "123";
-        }
+
         SaveGame mSaveGame = new SaveGame();
+
+        @Override
         public void Savegame(int id, boolean isOver, String text){
             String sql = "update " + SaveGame.class.getSimpleName() + " set text = '" +
                     text + "', isOver = '" + isOver + "' where id = " + id;
             SQLiteHelper.with(RankService.this).update(sql);
         }
+
+        @Override
         public void initSaveGame(){
             SQLiteHelper.with(RankService.this).deleteTable(SaveGame.class);
         }
+        @Override
+        public void setBestScore(String score){
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putString("bestScore",score);
+            editor.apply();
+        }
+        @Override
+        public String getBestScore(){
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            return sp.getString("bestScore", "0");
+        }
     };
-
 
     @Override
     public IBinder onBind(Intent intent) {

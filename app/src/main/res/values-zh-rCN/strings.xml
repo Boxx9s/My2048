@@ -9,4 +9,7 @@
     <string name="game_setting">"设置 "</string>
     <string name="widget_rank">排名</string>
     <string name="widget_refresh">更新</string>
+    <string name="setting_sound">音乐</string>
+    <string name="defaultName">player</string>
+    <string name="player">玩家:</string>
 </resources>

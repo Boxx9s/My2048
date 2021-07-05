@@ -1,14 +1,23 @@
 package com.example.my2048;
 
+import android.annotation.SuppressLint;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+
+
 import android.media.AudioManager;
 import android.media.SoundPool;
+
 import android.os.Bundle;
 import android.os.RemoteException;
+
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,19 +25,26 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.my2048.base.MyApplication;
 import com.example.my2048.model.*;
-import com.example.my2048.util.SQLiteHelper;
-import com.example.my2048.util.SoundPlayUtils;
+import com.example.my2048.util.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * @author zhb
+ */
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "GameActivity";
     private final float time = 200;
@@ -40,17 +56,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mBestScore;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
-    private int MySorce = 0;
+    private int mMyScore = 0;
     private Button reset;
     private Button zymBtn;
     private AlertDialog dialog;
-    private Button alertRestart, alert_retrun;
+    private Button malertRestart, malert_retrun;
     private SoundPool soundPool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 5);
     private MyApplication mp;
     private SaveGame mSaveGame;
+    private ChangeStyleTool mChangeStyleTool;
+    private Chronometer mChronometer;
+    private int tempFour;
+    private Button start;
+    private Button pause;
+    private long recordingTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        recordingTime = 0;
+        mChangeStyleTool = new ChangeStyleTool();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         SoundPlayUtils.init(this);
@@ -64,12 +88,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() throws RemoteException {
+        start = findViewById(R.id.kkk);
+        pause = findViewById(R.id.lll);
+        mChronometer = findViewById(R.id.clock);
         mNowScore = (TextView) findViewById(R.id.now_score);
         mBestScore = (TextView) findViewById(R.id.best_score);
         reset = (Button) findViewById(R.id.reset);
         reset.setOnClickListener(this);
-        sp = PreferenceManager.getDefaultSharedPreferences(this);
-        editor = sp.edit();
+        start.setOnClickListener(this);
+        pause.setOnClickListener(this);
         compot = AnimationUtils.loadAnimation(this, R.anim.synt);
         initData();
         View view1 = LayoutInflater.from(this).inflate(R.layout.game_alert, null);
@@ -77,16 +104,16 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 .setCancelable(false)
                 .setView(view1)
                 .create();
-        alert_retrun = view1.findViewById(R.id.retrun_alert);
-        alert_retrun.setOnClickListener(new View.OnClickListener() {
+        malert_retrun = view1.findViewById(R.id.retrun_alert);
+        malert_retrun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                retrunMain();
+                returnMain();
                 dialog.dismiss();
             }
         });
-        alertRestart = view1.findViewById(R.id.restart_alert);
-        alertRestart.setOnClickListener(new View.OnClickListener() {
+        malertRestart = view1.findViewById(R.id.restart_alert);
+        malertRestart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
@@ -101,19 +128,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         zymBtn.setOnClickListener(this);
     }
     private void initData() throws RemoteException {
-        MySorce = 0;
+        mMyScore = 0;
+        tempFour = 4;
         int x , y;
         name = new int[][]{{R.id.id_00, R.id.id_01, R.id.id_02, R.id.id_03}, {R.id.id_10, R.id.id_11, R.id.id_12, R.id.id_13},
                 {R.id.id_20, R.id.id_21, R.id.id_22, R.id.id_23}, {R.id.id_30, R.id.id_31, R.id.id_32, R.id.id_33}};
         isOver = new Boolean[][]{{false, false, false, false}, {false, false, false, false},
                 {false, false, false, false}, {false, false, false, false}};
         mNowScore.setText("0");
-        mBestScore.setText(sp.getString("mBestScore", 0 + ""));
-        if(!mp.isContiune()){
-            SQLiteHelper.with(this).deleteTable(SaveGame.class.getSimpleName());
+        mBestScore.setText(mp.aidl.getBestScore());
+        if(!mp.isContinue()){
+            mp.aidl.initSaveGame();
             mSaveGame = new SaveGame();
-            for (x = 0;x < 4; x++){
-                for(y = 0;y < 4;y++){
+            for (x = 0;x < tempFour; x++){
+                for(y = 0;y < tempFour;y++){
                     mSaveGame.setId(name[x][y]);
                     mSaveGame.setText("");
                     mSaveGame.setOver(false);
@@ -129,94 +157,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             setNum();
-        }else if(mp.isContiune){
+        }else if(mp.isContinue){
             String sql = "select * from " + SaveGame.class.getSimpleName();
-            List<Map<String, String>> SaveResult = SQLiteHelper.with(this).query(sql);
+            List<Map<String, String>> mSaveResult = SQLiteHelper.with(this).query(sql);
             TextView t;
-            for(x = 0; x < 4; x++){
-                for(y = 0; y < 4; y++){
-                    Map<String, String> map= SaveResult.get((y+1) + (4 * x)-1);
-                    isOver[x][y]= map.get("isOver").equals("true");
+            for(x = 0; x < tempFour; x++){
+                for(y = 0; y < tempFour; y++){
+                    Map<String, String> map= mSaveResult.get((y+1) + (4 * x)-1);
+                    isOver[x][y]= "true".equals(map.get("isOver"));
                     t = findViewById(name[x][y]);
                     t.setText(""+map.get("text"));
-                    switch (t.getText().toString().length()) {
-                        case 1:
-                            t.setTextSize(40);
-                            break;
-                        case 2:
-                            t.setTextSize(40);
-                            break;
-                        case 3:
-                            t.setTextSize(35);
-                            break;
-                        case 4:
-                            t.setTextSize(30);
-                            break;
-                        case 5:
-                            t.setTextSize(25);
-                            break;
-                        case 6:
-                            t.setTextSize(20);
-                            break;
-                        case 7:
-                            t.setTextSize(18);
-                            break;
-                        case 8:
-                            t.setTextSize(16);
-                            break;
-                        case 9:
-                            t.setTextSize(14);
-                            break;
-                        case 10:
-                            t.setTextSize(12);
-                            break;
-                    }
-                    switch (t.getText().toString()) {
-                        case "2":
-                            t.setBackgroundResource(R.drawable.text_2);
-                            t.setTextColor(Color.BLACK);
-                            break;
-                        case "4":
-                            t.setBackgroundResource(R.drawable.text_4);
-                            t.setTextColor(Color.BLACK);
-                            break;
-                        case "8":
-                            t.setBackgroundResource(R.drawable.text_8);
-                            t.setTextColor(Color.BLACK);
-                            break;
-                        case "16":
-                            t.setBackgroundResource(R.drawable.text_16);
-                            t.setTextColor(Color.BLACK);
-                            break;
-                        case "32":
-                            t.setBackgroundResource(R.drawable.text_32);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "64":
-                            t.setBackgroundResource(R.drawable.text_64);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "128":
-                            t.setBackgroundResource(R.drawable.text_128);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "256":
-                            t.setBackgroundResource(R.drawable.text_256);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "512":
-                            t.setBackgroundResource(R.drawable.text_512);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "1024":
-                            t.setBackgroundResource(R.drawable.text_1024);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                        case "2048":
-                            t.setBackgroundResource(R.drawable.text_2048);
-                            t.setTextColor(Color.WHITE);
-                            break;
-                    }
+                    mChangeStyleTool.ChangeStyle(t);
+                    mChangeStyleTool.changSize(t);
                 }
             }
         }
@@ -224,15 +176,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private void initGesture() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
-
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 SoundPlayUtils.play(2);
                 if (e1.getX() - e2.getX() > time) {
-                    for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
+                    for (int i = 0; i < tempFour; i++) {
+                        for (int j = 0; j < tempFour; j++) {
                             if (isOver[j][i]) {
-                                setLeft(j, i);
+                                try {
+                                    setLeft(j, i);
+                                } catch (RemoteException pE) {
+                                    pE.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -240,10 +195,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     return true;
                 }
                 if (e2.getX() - e1.getX() > time) {
-                    for (int i = 3; i >= 0; i--) {
-                        for (int j = 3; j >= 0; j--) {
+                    for (int i = tempFour - 1; i >= 0; i--) {
+                        for (int j = tempFour - 1; j >= 0; j--) {
                             if (isOver[j][i]) {
-                                setRight(j, i);
+                                try {
+                                    setRight(j, i);
+                                } catch (RemoteException pE) {
+                                    pE.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -251,10 +210,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     return true;
                 }
                 if (e1.getY() - e2.getY() > time) {
-                    for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
+                    for (int i = 0; i < tempFour; i++) {
+                        for (int j = 0; j < tempFour; j++) {
                             if (isOver[i][j]) {
-                                setUp(i, j);
+                                try {
+                                    setUp(i, j);
+                                } catch (RemoteException pE) {
+                                    pE.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -262,10 +225,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     return true;
                 }
                 if (e2.getY() - e1.getY() > time) {
-                    for (int i = 3; i >= 0; i--) {
-                        for (int j = 0; j < 4; j++) {
+                    for (int i = tempFour - 1; i >= 0; i--) {
+                        for (int j = 0; j < tempFour; j++) {
                             if (isOver[i][j]) {
-                                setDonw(i, j);
+                                try {
+                                    setDown(i, j);
+                                } catch (RemoteException pE) {
+                                    pE.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -276,14 +243,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-    private void setLeft(int i, int j) {
+    private void setLeft(int i, int j) throws RemoteException {
         int h = i;
         sign1:
             if (j != 0) {
                 for (int w = j; w > 0; w--) {
-                    TextView ahead = findViewById(name[h][w - 1]);/*前面的TextView*/
-                    TextView local = findViewById(name[h][w]);/*后面的TextView*/
-                    if (ahead.getText().toString() != "" && ahead.getText().toString().equals(local.getText().toString())) {
+                    TextView ahead = findViewById(name[h][w - 1]);
+                    TextView local = findViewById(name[h][w]);
+                    if (!ahead.getText().toString().equals("") && ahead.getText().toString().equals(local.getText().toString())) {
                         SoundPlayUtils.play(1);
                         int num = parse(ahead.getText().toString());
                         ahead.setText(num + num + "");
@@ -292,7 +259,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[h][w - 1] = true;
                         isOver[h][w] = false;
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                         setScore(ahead);
                         break sign1;
                     }
@@ -302,16 +272,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                     }
                 }
             }
-    }
-    private void setRight(int i, int j) {
+        }
+    private void setRight(int i, int j) throws RemoteException {
         sign2:
-        for (int h = 0; h < 4; h++) {
+        for (int h = 0; h < tempFour; h++) {
             if (i == h && j != 3) {
-                for (int w = j; w < 3; w++) {
+                for (int w = j; w < tempFour - 1; w++) {
                     TextView ahead = findViewById(name[h][w + 1]);
                     TextView local = findViewById(name[h][w]);
                     if (ahead.getText().toString() != "" && ahead.getText().toString().equals(local.getText().toString())) {
@@ -323,7 +296,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[h][w + 1] = true;
                         isOver[h][w] = false;
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                         setScore(ahead);
                         break sign2;
                     }
@@ -333,18 +309,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                     }
                 }
             }
         }
     }
 
-
-    private void setUp(int i, int j) {
+    private void setUp(int i, int j) throws RemoteException {
         sign3:
-        for (int h = 0; h < 4; h++) {
-            for (int w = 0; w < 4; w++) {
+        for (int h = 0; h < tempFour; h++) {
+            for (int w = 0; w < tempFour; w++) {
                 if (w == j && i != 0) {
                     TextView ahead = findViewById(name[i - 1][j]);
                     TextView local = findViewById(name[i][j]);
@@ -357,7 +335,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[i - 1][j] = true;
                         isOver[i][j] = false;
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                         setScore(ahead);
                         break sign3;
                     }
@@ -367,23 +348,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                     }
                     i--;
                 }
-
             }
-
         }
     }
-    private void setDonw(int i, int j) {
+    private void setDown(int i, int j) throws RemoteException {
         sign4:
-        for (int h = 0; h < 4; h++) {
-            for (int w = 0; w < 4; w++) {
+        for (int h = 0; h < tempFour; h++) {
+            for (int w = 0; w < tempFour; w++) {
                 if (w == j && i < 3) {
                     TextView ahead = findViewById(name[i + 1][j]);
                     TextView local = findViewById(name[i][j]);
-
                     if (!TextUtils.isEmpty(ahead.getText()) && ahead.getText().toString().equals(local.getText().toString())) {
                         SoundPlayUtils.play(1);
                         int num = parse(ahead.getText().toString());
@@ -393,42 +374,38 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[i + 1][j] = true;
                         isOver[i][j] = false;
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                         setScore(ahead);
                         break sign4;
                     }
-
                     if (TextUtils.isEmpty(ahead.getText())) {
                         isOver[i + 1][j] = true;
                         isOver[i][j] = false;
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        ChangStyle(ahead, local);
+                        mChangeStyleTool.changSize(ahead);
+                        mChangeStyleTool.changSize(local);
+                        mChangeStyleTool.ChangeStyle(ahead);
+                        mChangeStyleTool.ChangeStyle(local);
                     }
-
-
                     i++;
                 }
-
             }
-
         }
-
     }
-
-
     private void setNum() throws RemoteException {
-
         int index = getTrueNum();
-        int a ;
-        int x = new Random().nextInt(4);
-        int y = new Random().nextInt(4);
-        TextView m ;
         if (index != 16) {
-            int i , j;
-
+            int a ;
+            int x = new Random().nextInt(4);
+            int y = new Random().nextInt(4);
             a = new Random().nextInt(4);
+            TextView m ;
+            int i , j;
             while (isOver[x][y]) {
                 x = new Random().nextInt(4);
                 y = new Random().nextInt(4);
@@ -437,19 +414,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             isOver[x][y] = true;
             if (a < 2) {
                 textView.setText(2 + "");
-                textView.setBackgroundResource(R.drawable.text_2);
+                mChangeStyleTool.ChangeStyle(textView);
+                mChangeStyleTool.changSize(textView);
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
                 textView.setAnimation(animation);
                 textView.startAnimation(animation);
             } else {
                 textView.setText(4 + "");
-                textView.setBackgroundResource(R.drawable.text_4);
+                mChangeStyleTool.ChangeStyle(textView);
+                mChangeStyleTool.changSize(textView);
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
                 textView.setAnimation(animation);
                 textView.startAnimation(animation);
                 }
-            for(i = 0; i < 4; i++){
-                for(j = 0; j<4; j++){
+            for(i = 0; i < tempFour; i++){
+                for(j = 0; j<tempFour; j++){
                     m = findViewById(name[i][j]);
                     try {
                         mp.aidl.Savegame(name[i][j],isOver[i][j],m.getText().toString());
@@ -460,7 +439,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         }else {
             dialog.show();
-            mp.aidl.sendScore(mNowScore.toString(),"player");
+            mp.aidl.sendScore(mNowScore.getText().toString(),mp.mPlayerName);
         }
     }
     private void setnum(){
@@ -475,7 +454,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int index = 0;
         for (Boolean[] Bs : isOver) {
             for (Boolean B : Bs) {
-                if (B == true) {
+                if (B) {
                     index++;
                 }
             }
@@ -490,6 +469,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private int parse(String data) {
         return Integer.parseInt(data);
     }
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -501,194 +481,72 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.zym_btn:
-                retrunMain();
+                returnMain();
+                break;
+            case R.id.kkk:
+                mChronometer.setBase(SystemClock.elapsedRealtime() - recordingTime);
+                mChronometer.start();
+                break;
+            case R.id.lll:
+                mChronometer.stop();
+                recordingTime = SystemClock.elapsedRealtime() - mChronometer.getBase();
+                break;
+            default:
                 break;
         }
     }
 
-    private void retrunMain() {
+    private void returnMain() {
         Intent intent = new Intent(GameActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }
 
-    private void ChangStyle(TextView ahead, TextView local) {
-        switch (ahead.getText().toString().length()) {
-            case 1:
-                ahead.setTextSize(40);
-                break;
-            case 2:
-                ahead.setTextSize(40);
-                break;
-            case 3:
-                ahead.setTextSize(35);
-                break;
-            case 4:
-                ahead.setTextSize(30);
-                break;
-            case 5:
-                ahead.setTextSize(25);
-                break;
-            case 6:
-                ahead.setTextSize(20);
-                break;
-            case 7:
-                ahead.setTextSize(18);
-                break;
-            case 8:
-                ahead.setTextSize(16);
-                break;
-            case 9:
-                ahead.setTextSize(14);
-                break;
-            case 10:
-                ahead.setTextSize(12);
-                break;
-        }
+
+    private void setScore(TextView ahead) throws RemoteException {
         switch (ahead.getText().toString()) {
             case "2":
-                ahead.setBackgroundResource(R.drawable.text_2);
-                ahead.setTextColor(Color.BLACK);
+                mMyScore += 2;
                 break;
             case "4":
-                ahead.setBackgroundResource(R.drawable.text_4);
-                ahead.setTextColor(Color.BLACK);
+                mMyScore += 4;
                 break;
             case "8":
-                ahead.setBackgroundResource(R.drawable.text_8);
-                ahead.setTextColor(Color.BLACK);
+                mMyScore += 8;
                 break;
             case "16":
-                ahead.setBackgroundResource(R.drawable.text_16);
-                ahead.setTextColor(Color.BLACK);
+                mMyScore += 16;
                 break;
             case "32":
-                ahead.setBackgroundResource(R.drawable.text_32);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 32;
                 break;
             case "64":
-                ahead.setBackgroundResource(R.drawable.text_64);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 64;
                 break;
             case "128":
-                ahead.setBackgroundResource(R.drawable.text_128);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 128;
                 break;
             case "256":
-                ahead.setBackgroundResource(R.drawable.text_256);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 256;
                 break;
             case "512":
-                ahead.setBackgroundResource(R.drawable.text_512);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 512;
                 break;
             case "1024":
-                ahead.setBackgroundResource(R.drawable.text_1024);
-                ahead.setTextColor(Color.WHITE);
+                mMyScore += 1024;
                 break;
             case "2048":
-                ahead.setBackgroundResource(R.drawable.text_2048);
-                ahead.setTextColor(Color.WHITE);
-                break;
-
-        }
-
-        switch (local.getText().toString()) {
-            case "2":
-                local.setBackgroundResource(R.drawable.text_2);
-                local.setTextColor(Color.BLACK);
-                break;
-            case "4":
-                local.setBackgroundResource(R.drawable.text_4);
-                local.setTextColor(Color.BLACK);
-                break;
-            case "8":
-                local.setBackgroundResource(R.drawable.text_8);
-                local.setTextColor(Color.BLACK);
-                break;
-            case "16":
-                local.setBackgroundResource(R.drawable.text_16);
-                local.setTextColor(Color.BLACK);
-                break;
-            case "32":
-                local.setBackgroundResource(R.drawable.text_32);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "64":
-                local.setBackgroundResource(R.drawable.text_64);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "128":
-                local.setBackgroundResource(R.drawable.text_128);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "256":
-                local.setBackgroundResource(R.drawable.text_256);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "512":
-                local.setBackgroundResource(R.drawable.text_512);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "1024":
-                local.setBackgroundResource(R.drawable.text_1024);
-                local.setTextColor(Color.WHITE);
-                break;
-            case "2048":
-                local.setBackgroundResource(R.drawable.text_2048);
-                local.setTextColor(Color.WHITE);
+                mMyScore += 2048;
                 break;
             default:
-                local.setTextColor(Color.BLACK);
+                break;
         }
+        mNowScore.setText(mMyScore + "");
+            if (parse(mNowScore.getText().toString()) > parse(mp.aidl.getBestScore())) {
+                mp.aidl.setBestScore(mNowScore.getText().toString());
+                mBestScore.setText(mMyScore + "");
+            }
     }
-
-
-    private void setScore(TextView ahead) {
-        switch (ahead.getText().toString()) {
-            case "2":
-                MySorce += 2;
-                break;
-            case "4":
-                MySorce += 4;
-                break;
-            case "8":
-                MySorce += 8;
-                break;
-            case "16":
-                MySorce += 16;
-                break;
-            case "32":
-                MySorce += 32;
-                break;
-            case "64":
-                MySorce += 64;
-                break;
-            case "128":
-                MySorce += 128;
-                break;
-            case "256":
-                MySorce += 256;
-                break;
-            case "512":
-                MySorce += 512;
-                break;
-            case "1024":
-                MySorce += 1024;
-                break;
-            case "2048":
-                MySorce += 2048;
-                break;
-
-        }
-        mNowScore.setText(MySorce + "");
-        if (parse(mNowScore.getText().toString()) > parse(sp.getString("mBestScore", 0 + ""))) {
-            editor.putString("mBestScore", MySorce + "");
-            editor.commit();
-            mBestScore.setText(MySorce + "");
-        }
-    }
-
     private long exitTime = 0;
 
     @Override
@@ -707,8 +565,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.LENGTH_SHORT).show();
             exitTime = System.currentTimeMillis();
         } else {
-            for(int i = 0; i < 4; i++){
-                for(int j = 0; j < 4; j++){
+            for(int i = 0; i < tempFour; i++){
+                for(int j = 0; j < tempFour; j++){
                 }
             }
             finish();

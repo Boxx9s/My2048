@@ -1,72 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_bg"
     tools:context=".MainActivity">
+
     <LinearLayout
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:layout_height="wrap_content">
+        android:layout_marginTop="40dp">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/type" />
-
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:orientation="vertical"
-        android:layout_height="wrap_content">
+        >
         <LinearLayout
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/main_text"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textColor="#fff"
+                android:text="@string/player"/>
+            <EditText
+                android:id="@+id/playerName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/defaultName"
+                android:textSize="20dp"
+                android:gravity="center"
+                android:singleLine="true"
+                />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_marginTop="30dp"
             android:layout_width="wrap_content"
-            android:background="@drawable/main_btn1"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/main_btn1">
+
             <Button
+                android:id="@+id/game_start"
                 android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:background="@drawable/main_btn2"
                 android:text="@string/game_start"
-                android:textSize="20sp"
-                android:id="@+id/game_start"
-                android:layout_margin="5dp"
                 android:textColor="#FFF"
-                android:layout_height="wrap_content"/>
+                android:textSize="20sp" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:background="@drawable/main_btn1"
+            android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:layout_height="wrap_content">
+            android:background="@drawable/main_btn1">
+
             <Button
+                android:id="@+id/game_continue"
                 android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:background="@drawable/main_btn2"
                 android:text="@string/game_continue"
-                android:textSize="20sp"
-                android:id="@+id/game_continue"
-                android:layout_margin="5dp"
                 android:textColor="#FFF"
-                android:layout_height="wrap_content"/>
+                android:textSize="20sp" />
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
-            android:background="@drawable/main_btn1"
+            android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:layout_height="wrap_content">
+            android:background="@drawable/main_btn1">
+
             <Button
+                android:id="@+id/game_setting"
                 android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:background="@drawable/main_btn2"
                 android:text="@string/game_setting"
-                android:textSize="20sp"
-                android:id="@+id/setting_game"
-                android:layout_margin="5dp"
                 android:textColor="#FFF"
-                android:layout_height="wrap_content"/>
+                android:textSize="20sp" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

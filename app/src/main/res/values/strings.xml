@@ -8,4 +8,9 @@
     <string name="game_setting">Setting</string>
     <string name="widget_rank">Rank</string>
     <string name="widget_refresh">Refresh</string>
+    <string name="setting_sound">Sound</string>
+    <string name="player">Player:</string>
+    <string name="defaultName">player</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

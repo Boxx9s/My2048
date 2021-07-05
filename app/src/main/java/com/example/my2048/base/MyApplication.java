@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.ListView;
 
 import com.example.my2048.RankistAIDL;
 import com.example.my2048.service.RankService;
@@ -13,11 +14,18 @@ import com.example.my2048.util.SQLiteHelper;
 import com.example.my2048.model.Score;
 import com.example.my2048.model.SaveGame;
 
+import javax.crypto.interfaces.PBEKey;
+
+/**
+ * @author zhb
+ */
 public class MyApplication extends Application {
     public RankistAIDL aidl ;
-    public boolean isContiune = false;
+    public boolean isContinue;
+    public String mPlayerName;
     @Override
     public void onCreate() {
+
         super.onCreate();
         initUtils();
         Intent intent = new Intent("com.example.my2048.service");
@@ -29,16 +37,18 @@ public class MyApplication extends Application {
             }
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
+
             }
         },BIND_AUTO_CREATE);
+        mPlayerName = "";
     }
 
-    public boolean isContiune() {
-        return isContiune;
+    public boolean isContinue() {
+        return isContinue;
     }
 
-    public void setContiune(boolean contiune) {
-        isContiune = contiune;
+    public void setContinue(boolean Continue) {
+        isContinue = Continue;
     }
 
     public void initUtils() {
