@@ -14,8 +14,9 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
+
 import android.text.TextUtils;
+
 
 import android.util.Log;
 import android.view.GestureDetector;
@@ -51,11 +52,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private int[][] name;
     private Boolean[][] isOver;
     private GestureDetector gestureDetector;
-    private Animation compot;
+    private Animation mAnimation;
     private TextView mNowScore;
     private TextView mBestScore;
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
     private int mMyScore = 0;
     private Button reset;
     private Button zymBtn;
@@ -70,6 +69,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button start;
     private Button pause;
     private long recordingTime;
+    private int soundId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +97,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         reset.setOnClickListener(this);
         start.setOnClickListener(this);
         pause.setOnClickListener(this);
-        compot = AnimationUtils.loadAnimation(this, R.anim.synt);
+        mAnimation = AnimationUtils.loadAnimation(this, R.anim.synt);
         initData();
         View view1 = LayoutInflater.from(this).inflate(R.layout.game_alert, null);
         dialog = new AlertDialog.Builder(this)
@@ -178,7 +178,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                SoundPlayUtils.play(2);
+                if(mp.isMute){
+                    SoundPlayUtils.play(2);
+                }
                 if (e1.getX() - e2.getX() > time) {
                     for (int i = 0; i < tempFour; i++) {
                         for (int j = 0; j < tempFour; j++) {
@@ -251,10 +253,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     TextView ahead = findViewById(name[h][w - 1]);
                     TextView local = findViewById(name[h][w]);
                     if (!ahead.getText().toString().equals("") && ahead.getText().toString().equals(local.getText().toString())) {
-                        SoundPlayUtils.play(1);
+                        if(mp.isMute){
+                            SoundPlayUtils.play(1);
+                        }
                         int num = parse(ahead.getText().toString());
                         ahead.setText(num + num + "");
-                        ahead.startAnimation(compot);
+                        ahead.startAnimation(mAnimation);
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[h][w - 1] = true;
@@ -288,11 +292,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     TextView ahead = findViewById(name[h][w + 1]);
                     TextView local = findViewById(name[h][w]);
                     if (ahead.getText().toString() != "" && ahead.getText().toString().equals(local.getText().toString())) {
-                        SoundPlayUtils.play(1);
+                        if(mp.isMute){
+                            SoundPlayUtils.play(1);
+                        }
                         int num = parse(ahead.getText().toString());
                         ahead.setText(num + num + "");
                         local.setText("");
-                        ahead.startAnimation(compot);
+                        ahead.startAnimation(mAnimation);
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[h][w + 1] = true;
                         isOver[h][w] = false;
@@ -327,11 +333,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     TextView ahead = findViewById(name[i - 1][j]);
                     TextView local = findViewById(name[i][j]);
                     if (!TextUtils.isEmpty(ahead.getText()) && ahead.getText().toString().equals(local.getText().toString())) {
-                        SoundPlayUtils.play(1);
+                        if(mp.isMute){
+                            SoundPlayUtils.play(1);
+                        }
                         int num = parse(ahead.getText().toString());
                         ahead.setText(num + num + "");
                         local.setText("");
-                        ahead.startAnimation(compot);
+                        ahead.startAnimation(mAnimation);
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[i - 1][j] = true;
                         isOver[i][j] = false;
@@ -366,11 +374,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     TextView ahead = findViewById(name[i + 1][j]);
                     TextView local = findViewById(name[i][j]);
                     if (!TextUtils.isEmpty(ahead.getText()) && ahead.getText().toString().equals(local.getText().toString())) {
-                        SoundPlayUtils.play(1);
+                        if(mp.isMute){
+                            SoundPlayUtils.play(1);
+                        }
                         int num = parse(ahead.getText().toString());
                         ahead.setText(num + num + "");
                         local.setText("");
-                        ahead.startAnimation(compot);
+                        ahead.startAnimation(mAnimation);
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[i + 1][j] = true;
                         isOver[i][j] = false;
@@ -501,7 +511,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
         finish();
     }
-
 
     private void setScore(TextView ahead) throws RemoteException {
         switch (ahead.getText().toString()) {

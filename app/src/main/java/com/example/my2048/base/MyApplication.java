@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.ListView;
 
@@ -23,9 +24,10 @@ public class MyApplication extends Application {
     public RankistAIDL aidl ;
     public boolean isContinue;
     public String mPlayerName;
+    public boolean isMute = new Boolean(true);
+    public int GameMode = 0;
     @Override
     public void onCreate() {
-
         super.onCreate();
         initUtils();
         Intent intent = new Intent("com.example.my2048.service");
@@ -34,10 +36,14 @@ public class MyApplication extends Application {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder service) {
                     aidl = RankistAIDL.Stub.asInterface(service);
+                try {
+                    isMute = aidl.isMute();
+                } catch (RemoteException pE) {
+                    pE.printStackTrace();
+                }
             }
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
-
             }
         },BIND_AUTO_CREATE);
         mPlayerName = "";

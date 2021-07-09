@@ -8,5 +8,6 @@ interface RankistAIDL{
     void Savegame(int id,boolean isOver, String text);
     void setBestScore(String score);
     String getBestScore();
-
-}
+    boolean isMute();
+    void setMute(boolean isMute);
+    }

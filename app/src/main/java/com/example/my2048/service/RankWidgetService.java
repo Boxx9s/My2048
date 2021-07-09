@@ -13,6 +13,7 @@ import com.example.my2048.model.Score;
 import com.example.my2048.util.SQLiteHelper;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,12 @@ public class RankWidgetService extends RemoteViewsService {
                 a.setPlayer(map.get("player"));
                 mScores.add(a);
             }
+            mScores.sort(new Comparator<Score>() {
+                @Override
+                public int compare(Score x, Score y) {
+                    return Integer.parseInt(y.getMscore()) - Integer.parseInt(x.getMscore());
+                }
+            });
         }
 
         @Override

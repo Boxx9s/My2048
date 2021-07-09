@@ -22,13 +22,10 @@ public class SoundPlayUtils {
             if (soundPlayUtils == null) {
                 soundPlayUtils = new SoundPlayUtils();
             }
-
             // 初始化声音
             mContext = context;
-
             mSoundPlayer.load(mContext, R.raw.hecheng, 1);// 1
             mSoundPlayer.load(mContext, R.raw.yidong2, 1);// 2
-
             return soundPlayUtils;
         }
 

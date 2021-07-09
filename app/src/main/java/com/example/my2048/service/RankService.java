@@ -9,6 +9,7 @@ import android.os.RemoteException;
 
 import com.example.my2048.MainActivity;
 import com.example.my2048.RankistAIDL;
+import com.example.my2048.base.MyApplication;
 import com.example.my2048.model.*;
 import com.example.my2048.util.SQLiteHelper;
 
@@ -20,7 +21,7 @@ public class RankService extends Service {
     private RankistAIDL mRank;
     MainActivity M;
     SharedPreferences sp;
-
+    MyApplication mp;
     @Override
     public void onCreate(){
         super.onCreate();
@@ -36,8 +37,6 @@ public class RankService extends Service {
             score1.setPlayer(player);
             SQLiteHelper.with(RankService.this).insert(score1);
         }
-
-        SaveGame mSaveGame = new SaveGame();
 
         @Override
         public void Savegame(int id, boolean isOver, String text){
@@ -62,6 +61,22 @@ public class RankService extends Service {
             sp = getSharedPreferences("sp_score", MODE_PRIVATE);
             @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
             return sp.getString("bestScore", "0");
+        }
+
+        @Override
+        public boolean isMute() throws RemoteException {
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            return sp.getBoolean("mute", true);
+        }
+
+        @Override
+        public void setMute(boolean isMute) throws RemoteException {
+            mp = (MyApplication)getApplication();
+            mp.isMute = isMute;
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("mute", isMute);
+            editor.apply();
         }
     };
 

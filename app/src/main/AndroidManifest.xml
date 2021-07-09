@@ -16,6 +16,11 @@
         android:roundIcon="@mipmap/my"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
+        <service
+            android:name=".service.WidgetUpdateService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <receiver android:name=".RankWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -34,6 +39,7 @@
             android:process=":rank">
             <intent-filter>
                 <action android:name="com.example.my2048.service" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
@@ -48,8 +54,10 @@
         </activity>
         <activity android:name=".GameActivity" />
         <activity android:name=".SettingActivity" />
-        <service android:name=".service.RankWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"/>
+
+        <service
+            android:name=".service.RankWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 import com.example.my2048.service.RankWidgetService;
+import com.example.my2048.service.WidgetUpdateService;
 
 /**
  * Implementation of App Widget functionality.
@@ -20,6 +21,8 @@ public class RankWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
+
+        context.startService(new Intent(context, WidgetUpdateService.class));
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         for (int appWidgetId : appWidgetIds) {
             mIntent =  new Intent(context, RankWidgetService.class);
