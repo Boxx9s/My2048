@@ -10,9 +10,14 @@
     <string name="widget_refresh">Refresh</string>
     <string name="setting_sound">Sound</string>
     <string name="player">Player:</string>
-    <string name="defaultName">player</string>
-    <string-array name="spinner_item">
-        <item>Time wins</item>
-        <item>Score wins</item>
-    </string-array>
+    <string name="defaultName" translatable="false">player</string>
+    <string name="hurry_up">Hurry up</string>
+    <string name="game_mode">Game Mode</string>
+    <string name="clear_data">Clear Data</string>
+    <string name="pause">Pause</string>
+    <string name="tocontinue">Continue</string>
+    <string name="leaderboard">LeaderBoard</string>
+    <string name="dialog_player">Player</string>
+    <string name="dialog_socre">Score</string>
+    <string name="dialog_time">Time</string>
 </resources>

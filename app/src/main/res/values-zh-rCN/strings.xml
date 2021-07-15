@@ -10,6 +10,14 @@
     <string name="widget_rank">排名</string>
     <string name="widget_refresh">更新</string>
     <string name="setting_sound">音乐</string>
-    <string name="defaultName">player</string>
     <string name="player">玩家:</string>
+    <string name="hurry_up">快来玩儿</string>
+    <string name="game_mode">游戏模式</string>
+    <string name="clear_data">清除数据</string>
+    <string name="pause">暂停</string>
+    <string name="tocontinue">继续</string>
+    <string name="leaderboard">排行榜</string>
+    <string name="dialog_player">玩家</string>
+    <string name="dialog_socre">得分</string>
+    <string name="dialog_time">时间</string>
 </resources>

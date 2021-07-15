@@ -7,10 +7,11 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/main_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="30dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -19,10 +20,12 @@
     </LinearLayout>
 
     <LinearLayout
+        android:layout_below="@+id/main_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:orientation="vertical"
+        android:layout_marginTop="10dp"
         >
         <LinearLayout
             android:layout_width="160dp"
@@ -37,11 +40,12 @@
                 android:text="@string/player"/>
             <EditText
                 android:id="@+id/playerName"
-                android:layout_width="wrap_content"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:text="@string/defaultName"
                 android:textSize="20dp"
                 android:gravity="center"
+                android:maxLength="6"
                 android:singleLine="true"
                 />
         </LinearLayout>
@@ -95,6 +99,21 @@
                 android:layout_margin="5dp"
                 android:background="@drawable/main_btn2"
                 android:text="@string/game_setting"
+                android:textColor="#FFF"
+                android:textSize="20sp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/main_btn1">
+            <Button
+                android:id="@+id/main_game_rank"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/main_btn2"
+                android:text="@string/leaderboard"
                 android:textColor="#FFF"
                 android:textSize="20sp" />
         </LinearLayout>

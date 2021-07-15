@@ -1,18 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/appWidgetBackgroundColor"
-    android:padding="@dimen/widget_margin"
-    android:theme="@style/ThemeOverlay.My2048.AppWidgetContainer"
+    android:gravity="center"
     android:orientation="vertical"
-    android:backgroundTint="@color/t_8">
+    android:background="#F6B156">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center">
         <TextView
-            android:textColor="#fff"
             android:textSize="20sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -22,21 +21,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/dialog_player" />
         <TextView
-            android:textColor="#fff"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/dialog_socre"/>
         <TextView
-            android:textColor="#fff"
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,26 +40,25 @@
             android:text="@string/dialog_time"/>
     </LinearLayout>
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:gravity="center"
-        android:id="@+id/list_"
         >
         <ListView
-            android:textColor="#fff"
-            android:id="@+id/rank_list"
+            android:id="@+id/fragment_rank_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"/>
+            android:layout_gravity="center"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/widget_empty"
+            android:text="@string/hurry_up"
+            android:textColor="#fff"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            android:gravity="center"/>
     </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/widget_empty"
-        android:text="@string/hurry_up"
-        android:textColor="#fff"
-        android:layout_gravity="center"
-        android:visibility="visible"
-        android:gravity="center"/>
 </LinearLayout>

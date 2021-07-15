@@ -22,6 +22,10 @@
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <Button
                     android:layout_width="wrap_content"
@@ -39,6 +43,27 @@
                     android:layout_toRightOf="@id/reset"
                     android:background="@drawable/zym"/>
             </LinearLayout>
+                <LinearLayout
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:id="@+id/game_time_pause"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_bg"
+                        android:text="@string/pause"
+                        android:textSize="20sp"/>
+                    <Chronometer
+                        android:id="@+id/clock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20dp"
+                        android:textColor="#F78D1E"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+
             <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -54,6 +79,7 @@
                     android:textSize="18sp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp"
                     android:textColor="#EEE4DA"
                     android:layout_height="wrap_content"/>
                 <TextView
@@ -77,6 +103,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:text="@string/Best_score"
+                    android:layout_marginTop="5dp"
                     android:textSize="18sp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
@@ -96,27 +123,7 @@
         </LinearLayout>
 
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <Chronometer
-                android:id="@+id/clock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20dp"
-                android:textColor="#F78D1E"
-                />
-            <Button
-                android:id="@+id/kkk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="start"/>
-            <Button
-                android:id="@+id/lll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="pause"/>
-        </LinearLayout>
+
 
     </LinearLayout>
 
@@ -145,7 +152,6 @@
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:layout_weight="1" />
-
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -180,7 +186,6 @@
                 android:gravity="center"
                 android:layout_height="match_parent"/>
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_weight="1"
@@ -282,7 +287,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_weight="1"
-            android:layout_height="wrap_content">
+             android:layout_height="wrap_content"
+            >
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -293,7 +299,8 @@
                 android:textSize="40sp"
                 android:textColor="#000"
                 android:gravity="center"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                tools:ignore="NestedWeights" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
