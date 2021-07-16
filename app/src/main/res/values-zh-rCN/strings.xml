@@ -9,7 +9,7 @@
     <string name="game_setting">"设置 "</string>
     <string name="widget_rank">排名</string>
     <string name="widget_refresh">更新</string>
-    <string name="setting_sound">音乐</string>
+    <string name="setting_sound">声音</string>
     <string name="player">玩家:</string>
     <string name="hurry_up">快来玩儿</string>
     <string name="game_mode">游戏模式</string>
@@ -20,4 +20,10 @@
     <string name="dialog_player">玩家</string>
     <string name="dialog_socre">得分</string>
     <string name="dialog_time">时间</string>
+    <array name="spinner_item">
+        <item>普通模式</item>
+        <item>趣味模式</item>
+    </array>
+    <string name="PausePrompt">游戏暂停，记得点击继续！</string>
+    <string name="ContinuePrompt">游戏继续！</string>
 </resources>

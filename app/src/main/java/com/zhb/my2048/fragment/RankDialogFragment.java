@@ -1,8 +1,7 @@
-package com.zhb.my2048.Fragment;
+package com.zhb.my2048.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author zhb
+ */
 public class RankDialogFragment extends DialogFragment {
     Context mContext;
     ListView mFragmentRankListview;
@@ -38,7 +40,6 @@ public class RankDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.rankdialogfragment, container);
         mFragmentRankListview = view.findViewById(R.id.fragment_rank_list);
         getData();
-        Log.i("laijie", "onCreateView: " + mScores.size());
         RankDialogFragmentListAdapter mRankDialogFragmentListAdapter =
                 new RankDialogFragmentListAdapter(mContext,mScores);
         mFragmentRankListview.setAdapter(mRankDialogFragmentListAdapter);
@@ -49,7 +50,7 @@ public class RankDialogFragment extends DialogFragment {
         mMapList = SQLiteHelper.with(mContext).query(sql);
         for (Map<String, String> map : mMapList) {
             Score a = new Score();
-            a.setMscore(map.get("mScore"));
+            a.setScore(map.get("mScore"));
             a.setPlayer(map.get("player"));
             a.setTime(Integer.parseInt(map.get("time")));
             mScores.add(a);
@@ -57,7 +58,7 @@ public class RankDialogFragment extends DialogFragment {
         mScores.sort(new Comparator<Score>() {
             @Override
             public int compare(Score x, Score y) {
-                return Integer.parseInt(y.getMscore()) - Integer.parseInt(x.getMscore());
+                return Integer.parseInt(y.getScore()) - Integer.parseInt(x.getScore());
             }
         });
     }

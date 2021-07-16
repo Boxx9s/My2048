@@ -2,7 +2,6 @@ package com.zhb.my2048;
 
 import android.annotation.SuppressLint;
 
-import android.content.Intent;
 import android.graphics.Color;
 
 
@@ -43,9 +42,31 @@ import java.util.Random;
  * @author zhb
  */
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
+    public final static String CUBE_TEXT_2_FUN = "当";
+    public final static String CUBE_TEXT_4_FUN = "你";
+    public final static String CUBE_TEXT_8_FUN = "玩";
+    public final static String CUBE_TEXT_16_FUN = "到";
+    public final static String CUBE_TEXT_32_FUN = "最";
+    public final static String CUBE_TEXT_64_FUN = "后";
+    public final static String CUBE_TEXT_128_FUN = "就";
+    public final static String CUBE_TEXT_256_FUN = "变";
+    public final static String CUBE_TEXT_512_FUN = "得";
+    public final static String CUBE_TEXT_1024_FUN = "很";
+    public final static String CUBE_TEXT_2048_FUN = "帅";
+    public final static String CUBE_TEXT_2 = "2";
+    public final static String CUBE_TEXT_4 = "4";
+    public final static String CUBE_TEXT_8 = "8";
+    public final static String CUBE_TEXT_16 = "16";
+    public final static String CUBE_TEXT_32 = "32";
+    public final static String CUBE_TEXT_64 = "64";
+    public final static String CUBE_TEXT_128 = "128";
+    public final static String CUBE_TEXT_256 = "256";
+    public final static String CUBE_TEXT_512 = "512";
+    public final static String CUBE_TEXT_1024 = "1024";
+    public final static String CUBE_TEXT_2048 = "2048";
     private static final String TAG = "GameActivity";
     private final float time = 200;
-    private int[][] name;
+    private int[][] mBoxIds;
     private Boolean[][] isOver;
     private GestureDetector gestureDetector;
     private Animation mAnimation;
@@ -53,12 +74,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mBestScore;
     private int mMyScore = 0;
     private Button reset;
-    private Button zymBtn;
+    private Button mBcakHome_btn;
     private AlertDialog dialog;
     private Button malertRestart, malert_retrun;
     private MyApplication mp;
     private SaveGame mSaveGame;
-    private ChangeStyleTool mChangeStyleTool;
+    private ChangeBoxTool mChangeBoxTool;
     private Chronometer mChronometer;
     private int tempFour;
     private Button mPause;
@@ -68,7 +89,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mChangeStyleTool = new ChangeStyleTool();
+        mChangeBoxTool = new ChangeBoxTool();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         SoundPlayUtils.init(this);
@@ -119,8 +140,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 dialog.dismiss();
             }
         });
-        zymBtn = (Button) findViewById(R.id.zym_btn);
-        zymBtn.setOnClickListener(this);
+        mBcakHome_btn = (Button) findViewById(R.id.mBcakHome_btn);
+        mBcakHome_btn.setOnClickListener(this);
         mPause.setOnClickListener(this);
     }
 
@@ -128,25 +149,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mMyScore = 0;
         tempFour = 4;
         int x, y;
-        name = new int[][]{{R.id.id_00, R.id.id_01, R.id.id_02, R.id.id_03}, {R.id.id_10, R.id.id_11, R.id.id_12, R.id.id_13},
+        mBoxIds = new int[][]{{R.id.id_00, R.id.id_01, R.id.id_02, R.id.id_03}, {R.id.id_10, R.id.id_11, R.id.id_12, R.id.id_13},
                 {R.id.id_20, R.id.id_21, R.id.id_22, R.id.id_23}, {R.id.id_30, R.id.id_31, R.id.id_32, R.id.id_33}};
         isOver = new Boolean[][]{{false, false, false, false}, {false, false, false, false},
                 {false, false, false, false}, {false, false, false, false}};
         mNowScore.setText("0");
-        mBestScore.setText(mp.aidl.getBestScore());
+        mBestScore.setText(mp.mRankistAIDL.getBestScore());
         if (!mp.isContinue()) {
             recordingTime = 0;
-            mp.aidl.initSaveGame();
+            mp.mRankistAIDL.initSaveGame();
             mSaveGame = new SaveGame();
             for (x = 0; x < tempFour; x++) {
                 for (y = 0; y < tempFour; y++) {
-                    mSaveGame.setId(name[x][y]);
+                    mSaveGame.setId(mBoxIds[x][y]);
                     mSaveGame.setText("");
                     mSaveGame.setOver(false);
                     SQLiteHelper.with(this).insert(mSaveGame);
                 }
             }
-            for (int[] bgs : name) {
+            for (int[] bgs : mBoxIds) {
                 for (int bg : bgs) {
                     TextView textView = findViewById(bg);
                     textView.setBackgroundResource(R.drawable.text_bg);
@@ -155,11 +176,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             recordingTime = 0;
-            mp.aidl.setTime(0);
+            mp.mRankistAIDL.setTime(0);
             mChronometer.setBase(SystemClock.elapsedRealtime());
             mChronometer.start();
             setNum();
         } else if (mp.isContinue) {
+            mNowScore.setText(mp.mRankistAIDL.getPauseScore());
             String sql = "select * from " + SaveGame.class.getSimpleName();
             List<Map<String, String>> mSaveResult = SQLiteHelper.with(this).query(sql);
             if (mSaveResult.size() == 0) {
@@ -171,11 +193,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     for (y = 0; y < tempFour; y++) {
                         Map<String, String> map = mSaveResult.get((y + 1) + (4 * x) - 1);
                         isOver[x][y] = "true".equals(map.get("isOver"));
-                        t = findViewById(name[x][y]);
+                        t = findViewById(mBoxIds[x][y]);
                         t.setText("" + map.get("text"));
-                        mChangeStyleTool.ChangeStyle(t);
-                        mChangeStyleTool.changSize(t);
-                        recordingTime = mp.aidl.getTime();
+                        mChangeBoxTool.ChangeStyle(t);
+                        mChangeBoxTool.changSize(t);
+                        recordingTime = mp.mRankistAIDL.getTime();
                         mChronometer.setBase(SystemClock.elapsedRealtime() - recordingTime * 1000);
                         mChronometer.start();
                     }
@@ -264,24 +286,110 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         sign1:
         if (j != 0) {
             for (int w = j; w > 0; w--) {
-                TextView ahead = findViewById(name[h][w - 1]);
-                TextView local = findViewById(name[h][w]);
+                TextView ahead = findViewById(mBoxIds[h][w - 1]);
+                TextView local = findViewById(mBoxIds[h][w]);
                 if (!ahead.getText().toString().equals("") && ahead.getText().toString().equals(local.getText().toString())) {
                     if (mp.isMute) {
                         SoundPlayUtils.play(1);
                     }
-                    int num = parse(ahead.getText().toString());
-                    ahead.setText(num + num + "");
+                    String text = ahead.getText().toString();
+                    String textScore;
+                    if(mp.GameMode == 0){
+                        int num = parse(text);
+                        ahead.setText(num + num + "");
+                        local.setText("");
+                        mChangeBoxTool.changSize(ahead);
+                        mChangeBoxTool.changSize(local);
+                        mChangeBoxTool.ChangeStyle(ahead);
+                        mChangeBoxTool.ChangeStyle(local);
+                        setScore(ahead.getText().toString());
+                    }else if(mp.GameMode == 1) {
+                        if (text.equals(CUBE_TEXT_2_FUN)) {
+                            textScore = CUBE_TEXT_4;
+                            setScore(textScore);
+                            ahead.setText(CUBE_TEXT_4_FUN);
+                            local.setText("");
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_4_FUN)) {
+                            ahead.setText(CUBE_TEXT_8_FUN);
+                            textScore = CUBE_TEXT_8;
+                            setScore(textScore);
+                            local.setText("");
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_8_FUN)) {
+                            ahead.setText(CUBE_TEXT_16_FUN);
+                            textScore = CUBE_TEXT_16;
+                            setScore(textScore);
+                            local.setText("");
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_16_FUN)) {
+                            ahead.setText(CUBE_TEXT_32_FUN);
+                            textScore = CUBE_TEXT_32;
+                            setScore(textScore);
+                            local.setText("");
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_32_FUN)) {
+                            ahead.setText(CUBE_TEXT_64_FUN);
+                            textScore = CUBE_TEXT_64;
+                            setScore(textScore);
+                            local.setText("");
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_64_FUN)) {
+                            ahead.setText(CUBE_TEXT_128_FUN);
+                            local.setText("");
+                            textScore = CUBE_TEXT_128;
+                            setScore(textScore);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_128_FUN)) {
+                            ahead.setText(CUBE_TEXT_256_FUN);
+                            local.setText("");
+                            textScore = CUBE_TEXT_256;
+                            setScore(textScore);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_256_FUN)) {
+                            ahead.setText(CUBE_TEXT_512_FUN);
+                            local.setText("");
+                            textScore = CUBE_TEXT_512;
+                            setScore(textScore);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_512_FUN)) {
+                            ahead.setText(CUBE_TEXT_1024_FUN);
+                            textScore = CUBE_TEXT_1024;
+                            local.setText("");
+                            setScore(textScore);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        if (text.equals(CUBE_TEXT_1024_FUN)) {
+                            ahead.setText(CUBE_TEXT_2048_FUN);
+                            local.setText("");
+                            textScore = CUBE_TEXT_2048;
+                            setScore(textScore);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                        }
+                        ahead.setTextSize(40);
+                    }
                     ahead.startAnimation(mAnimation);
-                    local.setText("");
                     local.setBackgroundResource(R.drawable.text_bg);
                     isOver[h][w - 1] = true;
                     isOver[h][w] = false;
-                    mChangeStyleTool.changSize(ahead);
-                    mChangeStyleTool.changSize(local);
-                    mChangeStyleTool.ChangeStyle(ahead);
-                    mChangeStyleTool.ChangeStyle(local);
-                    setScore(ahead);
                     break sign1;
                 }
                 if (ahead.getText().toString() == "") {
@@ -290,10 +398,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     ahead.setText(local.getText().toString() + "");
                     local.setText("");
                     local.setBackgroundResource(R.drawable.text_bg);
-                    mChangeStyleTool.changSize(ahead);
-                    mChangeStyleTool.changSize(local);
-                    mChangeStyleTool.ChangeStyle(ahead);
-                    mChangeStyleTool.ChangeStyle(local);
+                    mChangeBoxTool.changSize(ahead);
+                    mChangeBoxTool.changSize(local);
+                    mChangeBoxTool.ChangeStyle(ahead);
+                    mChangeBoxTool.ChangeStyle(local);
                 }
             }
         }
@@ -305,24 +413,110 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         for (int h = 0; h < tempFour; h++) {
             if (i == h && j != 3) {
                 for (int w = j; w < tempFour - 1; w++) {
-                    TextView ahead = findViewById(name[h][w + 1]);
-                    TextView local = findViewById(name[h][w]);
+                    TextView ahead = findViewById(mBoxIds[h][w + 1]);
+                    TextView local = findViewById(mBoxIds[h][w]);
                     if (ahead.getText().toString() != "" && ahead.getText().toString().equals(local.getText().toString())) {
                         if (mp.isMute) {
                             SoundPlayUtils.play(1);
                         }
-                        int num = parse(ahead.getText().toString());
-                        ahead.setText(num + num + "");
-                        local.setText("");
+                        String text = ahead.getText().toString();
+                        String textScore;
+                        if(mp.GameMode == 0){
+                            int num = parse(text);
+                            ahead.setText(num + num + "");
+                            local.setText("");
+                            mChangeBoxTool.changSize(ahead);
+                            mChangeBoxTool.changSize(local);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                            setScore(ahead.getText().toString());
+                        }else if(mp.GameMode == 1) {
+                            if (text.equals(CUBE_TEXT_2_FUN)) {
+                                textScore = CUBE_TEXT_4;
+                                setScore(textScore);
+                                ahead.setText(CUBE_TEXT_4_FUN);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_4_FUN)) {
+                                ahead.setText(CUBE_TEXT_8_FUN);
+                                textScore = CUBE_TEXT_8;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_8_FUN)) {
+                                ahead.setText(CUBE_TEXT_16_FUN);
+                                textScore = CUBE_TEXT_16;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_16_FUN)) {
+                                ahead.setText(CUBE_TEXT_32_FUN);
+                                textScore = CUBE_TEXT_32;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_32_FUN)) {
+                                ahead.setText(CUBE_TEXT_64_FUN);
+                                textScore = CUBE_TEXT_64;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_64_FUN)) {
+                                ahead.setText(CUBE_TEXT_128_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_128;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_128_FUN)) {
+                                ahead.setText(CUBE_TEXT_256_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_256;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_256_FUN)) {
+                                ahead.setText(CUBE_TEXT_512_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_512;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_512_FUN)) {
+                                ahead.setText(CUBE_TEXT_1024_FUN);
+                                textScore = CUBE_TEXT_1024;
+                                local.setText("");
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_1024_FUN)) {
+                                ahead.setText(CUBE_TEXT_2048_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_2048;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            ahead.setTextSize(40);
+                        }
                         ahead.startAnimation(mAnimation);
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[h][w + 1] = true;
                         isOver[h][w] = false;
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
-                        setScore(ahead);
                         break sign2;
                     }
                     if (ahead.getText().toString() == "") {
@@ -331,10 +525,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
+                        mChangeBoxTool.changSize(ahead);
+                        mChangeBoxTool.changSize(local);
+                        mChangeBoxTool.ChangeStyle(ahead);
+                        mChangeBoxTool.ChangeStyle(local);
                     }
                 }
             }
@@ -346,24 +540,110 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         for (int h = 0; h < tempFour; h++) {
             for (int w = 0; w < tempFour; w++) {
                 if (w == j && i != 0) {
-                    TextView ahead = findViewById(name[i - 1][j]);
-                    TextView local = findViewById(name[i][j]);
+                    TextView ahead = findViewById(mBoxIds[i - 1][j]);
+                    TextView local = findViewById(mBoxIds[i][j]);
                     if (!TextUtils.isEmpty(ahead.getText()) && ahead.getText().toString().equals(local.getText().toString())) {
                         if (mp.isMute) {
                             SoundPlayUtils.play(1);
                         }
-                        int num = parse(ahead.getText().toString());
-                        ahead.setText(num + num + "");
-                        local.setText("");
+                        String text = ahead.getText().toString();
+                        String textScore;
+                        if(mp.GameMode == 0){
+                            int num = parse(text);
+                            ahead.setText(num + num + "");
+                            local.setText("");
+                            mChangeBoxTool.changSize(ahead);
+                            mChangeBoxTool.changSize(local);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                            setScore(ahead.getText().toString());
+                        }else if(mp.GameMode == 1) {
+                            if (text.equals(CUBE_TEXT_2_FUN)) {
+                                textScore = CUBE_TEXT_4;
+                                setScore(textScore);
+                                ahead.setText(CUBE_TEXT_4_FUN);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_4_FUN)) {
+                                ahead.setText(CUBE_TEXT_8_FUN);
+                                textScore = CUBE_TEXT_8;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_8_FUN)) {
+                                ahead.setText(CUBE_TEXT_16_FUN);
+                                textScore = CUBE_TEXT_16;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_16_FUN)) {
+                                ahead.setText(CUBE_TEXT_32_FUN);
+                                textScore = CUBE_TEXT_32;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_32_FUN)) {
+                                ahead.setText(CUBE_TEXT_64_FUN);
+                                textScore = CUBE_TEXT_64;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_64_FUN)) {
+                                ahead.setText(CUBE_TEXT_128_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_128;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_128_FUN)) {
+                                ahead.setText(CUBE_TEXT_256_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_256;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_256_FUN)) {
+                                ahead.setText(CUBE_TEXT_512_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_512;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_512_FUN)) {
+                                ahead.setText(CUBE_TEXT_1024_FUN);
+                                textScore = CUBE_TEXT_1024;
+                                local.setText("");
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_1024_FUN)) {
+                                ahead.setText(CUBE_TEXT_2048_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_2048;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            ahead.setTextSize(40);
+                        }
                         ahead.startAnimation(mAnimation);
                         local.setBackgroundResource(R.drawable.text_bg);
                         isOver[i - 1][j] = true;
                         isOver[i][j] = false;
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
-                        setScore(ahead);
                         break sign3;
                     }
                     if (TextUtils.isEmpty(ahead.getText())) {
@@ -372,10 +652,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
+                        mChangeBoxTool.changSize(ahead);
+                        mChangeBoxTool.changSize(local);
+                        mChangeBoxTool.ChangeStyle(ahead);
+                        mChangeBoxTool.ChangeStyle(local);
                     }
                     i--;
                 }
@@ -388,24 +668,110 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         for (int h = 0; h < tempFour; h++) {
             for (int w = 0; w < tempFour; w++) {
                 if (w == j && i < 3) {
-                    TextView ahead = findViewById(name[i + 1][j]);
-                    TextView local = findViewById(name[i][j]);
+                    TextView ahead = findViewById(mBoxIds[i + 1][j]);
+                    TextView local = findViewById(mBoxIds[i][j]);
                     if (!TextUtils.isEmpty(ahead.getText()) && ahead.getText().toString().equals(local.getText().toString())) {
                         if (mp.isMute) {
                             SoundPlayUtils.play(1);
                         }
-                        int num = parse(ahead.getText().toString());
-                        ahead.setText(num + num + "");
-                        local.setText("");
-                        ahead.startAnimation(mAnimation);
+                        String text = ahead.getText().toString();
+                        String textScore;
+                        if(mp.GameMode == 0){
+                            int num = parse(text);
+                            ahead.setText(num + num + "");
+                            local.setText("");
+                            mChangeBoxTool.changSize(ahead);
+                            mChangeBoxTool.changSize(local);
+                            mChangeBoxTool.ChangeStyle(ahead);
+                            mChangeBoxTool.ChangeStyle(local);
+                            setScore(ahead.getText().toString());
+                        }else if(mp.GameMode == 1) {
+                            if (text.equals(CUBE_TEXT_2_FUN)) {
+                                textScore = CUBE_TEXT_4;
+                                setScore(textScore);
+                                ahead.setText(CUBE_TEXT_4_FUN);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_4_FUN)) {
+                                ahead.setText(CUBE_TEXT_8_FUN);
+                                textScore = CUBE_TEXT_8;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_8_FUN)) {
+                                ahead.setText(CUBE_TEXT_16_FUN);
+                                textScore = CUBE_TEXT_16;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_16_FUN)) {
+                                ahead.setText(CUBE_TEXT_32_FUN);
+                                textScore = CUBE_TEXT_32;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_32_FUN)) {
+                                ahead.setText(CUBE_TEXT_64_FUN);
+                                textScore = CUBE_TEXT_64;
+                                setScore(textScore);
+                                local.setText("");
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_64_FUN)) {
+                                ahead.setText(CUBE_TEXT_128_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_128;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_128_FUN)) {
+                                ahead.setText(CUBE_TEXT_256_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_256;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_256_FUN)) {
+                                ahead.setText(CUBE_TEXT_512_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_512;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_512_FUN)) {
+                                ahead.setText(CUBE_TEXT_1024_FUN);
+                                textScore = CUBE_TEXT_1024;
+                                local.setText("");
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            if (text.equals(CUBE_TEXT_1024_FUN)) {
+                                ahead.setText(CUBE_TEXT_2048_FUN);
+                                local.setText("");
+                                textScore = CUBE_TEXT_2048;
+                                setScore(textScore);
+                                mChangeBoxTool.ChangeStyle(ahead);
+                                mChangeBoxTool.ChangeStyle(local);
+                            }
+                            ahead.setTextSize(40);
+                        }
                         local.setBackgroundResource(R.drawable.text_bg);
+                        ahead.startAnimation(mAnimation);
                         isOver[i + 1][j] = true;
                         isOver[i][j] = false;
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
-                        setScore(ahead);
                         break sign4;
                     }
                     if (TextUtils.isEmpty(ahead.getText())) {
@@ -414,10 +780,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         ahead.setText(local.getText().toString() + "");
                         local.setText("");
                         local.setBackgroundResource(R.drawable.text_bg);
-                        mChangeStyleTool.changSize(ahead);
-                        mChangeStyleTool.changSize(local);
-                        mChangeStyleTool.ChangeStyle(ahead);
-                        mChangeStyleTool.ChangeStyle(local);
+                        mChangeBoxTool.changSize(ahead);
+                        mChangeBoxTool.changSize(local);
+                        mChangeBoxTool.ChangeStyle(ahead);
+                        mChangeBoxTool.ChangeStyle(local);
                     }
                     i++;
                 }
@@ -425,52 +791,112 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void setNum() throws RemoteException {
         int index = getEmptyGridNum();
+        int i, j;
+        TextView pBox;
+        TextView pCompareBox;
         if (index != 16) {
-            int a;
+            int pNewNum;
             int x = new Random().nextInt(4);
             int y = new Random().nextInt(4);
-            a = new Random().nextInt(4);
+            pNewNum = new Random().nextInt(4);
             TextView m;
-            int i, j;
             while (isOver[x][y]) {
                 x = new Random().nextInt(4);
                 y = new Random().nextInt(4);
             }
-            TextView textView = findViewById(name[x][y]);
+            pBox = findViewById(mBoxIds[x][y]);
             isOver[x][y] = true;
-            if (a < 2) {
-                textView.setText(2 + "");
-                mChangeStyleTool.ChangeStyle(textView);
-                mChangeStyleTool.changSize(textView);
+            if (pNewNum < 2) {
+                if(mp.GameMode == 0) {
+                    pBox.setText(2 + "");
+                    mChangeBoxTool.ChangeStyle(pBox);
+                    mChangeBoxTool.changSize(pBox);
+                }else if(mp.GameMode == 1){
+                    pBox.setText(CUBE_TEXT_2_FUN);
+                    mChangeBoxTool.ChangeStyle(pBox);
+                }
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                textView.setAnimation(animation);
-                textView.startAnimation(animation);
+                pBox.setAnimation(animation);
+                pBox.startAnimation(animation);
             } else {
-                textView.setText(4 + "");
-                mChangeStyleTool.ChangeStyle(textView);
-                mChangeStyleTool.changSize(textView);
+                if(mp.GameMode == 0) {
+                    pBox.setText(4 + "");
+                    mChangeBoxTool.ChangeStyle(pBox);
+                    mChangeBoxTool.changSize(pBox);
+                }else if(mp.GameMode == 1){
+                    pBox.setText(CUBE_TEXT_4_FUN);
+                    mChangeBoxTool.ChangeStyle(pBox);
+                }
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.find);
-                textView.setAnimation(animation);
-                textView.startAnimation(animation);
+                pBox.setAnimation(animation);
+                pBox.startAnimation(animation);
             }
             for (i = 0; i < tempFour; i++) {
                 for (j = 0; j < tempFour; j++) {
-                    m = findViewById(name[i][j]);
+                    m = findViewById(mBoxIds[i][j]);
                     try {
-                        mp.aidl.SaveGame(name[i][j], isOver[i][j], m.getText().toString());
+                        mp.mRankistAIDL.SaveGame(mBoxIds[i][j], isOver[i][j], m.getText().toString());
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
                 }
             }
+            mp.mRankistAIDL.setPauseScore(mNowScore.getText().toString());
         } else {
-            dialog.show();
-            mChronometer.stop();
-            mp.aidl.initSaveGame();
-            recordingTime = SystemClock.elapsedRealtime() - mChronometer.getBase();
-            mp.aidl.sendScore(mNowScore.getText().toString(), mp.mPlayerName, recordingTime / 1000);
+            boolean isOver = true;
+            notOver:
+            for (i = 0; i < tempFour; i++) {
+                for (j = 0; j < tempFour; j++) {
+                    pBox = findViewById(mBoxIds[i][j]);
+                    if (i <= 2 && j <= 2) {
+                        pCompareBox = findViewById(mBoxIds[i][j + 1]);
+                        if (compareSame(pBox, pCompareBox)) {
+                            Log.i(TAG, "setNum: i:" + i + " j:" + j);
+                            isOver = false;
+                            break notOver;
+                        }
+                        pCompareBox = findViewById(mBoxIds[i + 1][j]);
+                        if (compareSame(pBox, pCompareBox)) {
+                            Log.i(TAG, "setNum: i:" + i + " j:" + j);
+                            isOver = false;
+                            break notOver;
+                        }
+                    } else if (i == 3 && j != 3) {
+                        pCompareBox = findViewById(mBoxIds[i][j + 1]);
+                        if (compareSame(pBox, pCompareBox)) {
+                            Log.i(TAG, "setNum: i:" + i + " j:" + j);
+                            isOver = false;
+                            break notOver;
+                        }
+                    } else if (j == 3 && i != 3) {
+                        pCompareBox = findViewById(mBoxIds[i + 1][j]);
+                        if (compareSame(pBox, pCompareBox)) {
+                            Log.i(TAG, "setNum: i:" + i + " j:" + j);
+                            isOver = false;
+                            break notOver;
+                        }
+                    }
+                }
+            }
+            if (isOver == true) {
+                dialog.show();
+                mChronometer.stop();
+                mp.mRankistAIDL.initSaveGame();
+                recordingTime = SystemClock.elapsedRealtime() - mChronometer.getBase();
+                mp.mRankistAIDL.sendScore(mNowScore.getText().toString(), mp.mPlayerName, recordingTime / 1000);
+            }
+        }
+    }
+
+
+    private boolean compareSame(TextView pTextView1, TextView pTextView2) {
+        if (pTextView1.getText().toString().equals(pTextView2.getText().toString())) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -515,20 +941,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     recordingTime = (SystemClock.elapsedRealtime() - mChronometer.getBase()) / 1000;
                     Log.i(TAG, "onPause: " + recordingTime);
                     try {
-                        mp.aidl.setTime(recordingTime);
+                        mp.mRankistAIDL.setTime(recordingTime);
                     } catch (RemoteException pE) {
                         pE.printStackTrace();
                     }
                     mPause.setText(R.string.tocontinue);
+                    Toast.makeText(this, R.string.PausePrompt, Toast.LENGTH_SHORT).show();
                 } else {
                     try {
-                        Log.i(TAG, "onResume: " + mp.aidl.getTime());
-                        mChronometer.setBase(SystemClock.elapsedRealtime() - mp.aidl.getTime() * 1000);
+                        Log.i(TAG, "onResume: " + mp.mRankistAIDL.getTime());
+                        mChronometer.setBase(SystemClock.elapsedRealtime() - mp.mRankistAIDL.getTime() * 1000);
                     } catch (RemoteException pE) {
                         pE.printStackTrace();
                     }
                     mChronometer.start();
                     mPause.setText(R.string.pause);
+                    Toast.makeText(this, R.string.ContinuePrompt, Toast.LENGTH_SHORT).show();
                 }
                 mGamePause = !mGamePause;
                 break;
@@ -542,7 +970,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
                 break;
-            case R.id.zym_btn:
+            case R.id.mBcakHome_btn:
                 returnMain();
                 break;
             default:
@@ -554,8 +982,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         finish();
     }
 
-    private void setScore(TextView ahead) throws RemoteException {
-        switch (ahead.getText().toString()) {
+    private void setScore(String pScore) throws RemoteException {
+        switch (pScore) {
             case "2":
                 mMyScore += 2;
                 break;
@@ -593,8 +1021,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
         mNowScore.setText(mMyScore + "");
-        if (parse(mNowScore.getText().toString()) > parse(mp.aidl.getBestScore())) {
-            mp.aidl.setBestScore(mNowScore.getText().toString());
+        if (parse(mNowScore.getText().toString()) > parse(mp.mRankistAIDL.getBestScore())) {
+            mp.mRankistAIDL.setBestScore(mNowScore.getText().toString());
             mBestScore.setText(mMyScore + "");
         }
     }
@@ -603,7 +1031,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             exit();
             return false;
@@ -625,22 +1052,24 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
     protected void onPause() {
         mChronometer.stop();
         recordingTime = (SystemClock.elapsedRealtime() - mChronometer.getBase()) / 1000;
         Log.i(TAG, "onPause: " + recordingTime);
         try {
-            mp.aidl.setTime(recordingTime);
+            mp.mRankistAIDL.setTime(recordingTime);
         } catch (RemoteException pE) {
             pE.printStackTrace();
         }
         super.onPause();
     }
 
+    @Override
     protected void onResume() {
         try {
-            Log.i(TAG, "onResume: " + mp.aidl.getTime());
-            mChronometer.setBase(SystemClock.elapsedRealtime() - mp.aidl.getTime() * 1000);
+            Log.i(TAG, "onResume: " + mp.mRankistAIDL.getTime());
+            mChronometer.setBase(SystemClock.elapsedRealtime() - mp.mRankistAIDL.getTime() * 1000);
         } catch (RemoteException pE) {
             pE.printStackTrace();
         }

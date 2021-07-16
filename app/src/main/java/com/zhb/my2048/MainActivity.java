@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.zhb.my2048.Fragment.RankDialogFragment;
+import com.zhb.my2048.fragment.RankDialogFragment;
 import com.zhb.my2048.base.MyApplication;
 
 /**
@@ -28,10 +28,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         mp = (MyApplication) getApplication();
         initView();
+
     }
-
     private void initView() {
-
         Button mLeaderBoard = (Button) findViewById(R.id.main_game_rank);
         Button mStartGame = (Button) findViewById(R.id.game_start);
         Button mContinueGame = (Button) findViewById(R.id.game_continue);

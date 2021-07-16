@@ -23,6 +23,7 @@ public class RankWidget extends AppWidgetProvider {
         // There may be multiple widgets active, so update all of them
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         for (int appWidgetId : appWidgetIds) {
+
             mIntent =  new Intent(context, RankWidgetService.class);
             mRv = new RemoteViews(context.getPackageName(), R.layout.rank_widget);
             mRv.setRemoteAdapter(R.id.rank_list, mIntent);

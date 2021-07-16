@@ -13,4 +13,8 @@ interface RankistAIDL{
     void setTime(long time);
     long getTime();
     void initScore();
+    void setPauseScore(String pPauseScore);
+    String getPauseScore();
+    void setGameMode(int GameMode);
+    int getGameMode();
     }

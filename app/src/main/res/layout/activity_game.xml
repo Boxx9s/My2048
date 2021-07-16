@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/all_bg"
+    android:background="#FBF6ED"
     android:layout_height="match_parent"
     tools:context=".GameActivity"
     android:gravity="">
@@ -39,7 +39,7 @@
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_marginLeft="10dp"
-                    android:id="@+id/zym_btn"
+                    android:id="@+id/mBcakHome_btn"
                     android:layout_toRightOf="@id/reset"
                     android:background="@drawable/zym"/>
             </LinearLayout>

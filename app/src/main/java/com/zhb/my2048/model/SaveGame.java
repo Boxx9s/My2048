@@ -1,5 +1,8 @@
 package com.zhb.my2048.model;
 
+/**
+ * @author zhb
+ */
 public class SaveGame {
     int id;
     String text;

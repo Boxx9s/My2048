@@ -41,7 +41,7 @@ public class RankWidgetService extends RemoteViewsService {
         @Override
         public RemoteViews getViewAt(int pI) {
             mRemoteViews = new RemoteViews(getPackageName(), R.layout.list_item);
-            mRemoteViews.setTextViewText(R.id.item_score, mScores.get(pI).getMscore());
+            mRemoteViews.setTextViewText(R.id.item_score, mScores.get(pI).getScore());
             mRemoteViews.setTextViewText(R.id.item_player, mScores.get(pI).getPlayer());
             mRemoteViews.setTextViewText(R.id.item_time, String.valueOf(mScores.get(pI).getTime()));
             Intent intent = new Intent();
@@ -56,7 +56,7 @@ public class RankWidgetService extends RemoteViewsService {
             mMapList = SQLiteHelper.with(RankWidgetService.this).query(sql);
             for (Map<String, String> map : mMapList) {
                 Score a = new Score();
-                a.setMscore(map.get("mScore"));
+                a.setScore(map.get("mScore"));
                 a.setPlayer(map.get("player"));
                 a.setTime(Integer.parseInt(map.get("time")));
                 mScores.add(a);
@@ -64,7 +64,7 @@ public class RankWidgetService extends RemoteViewsService {
             mScores.sort(new Comparator<Score>() {
                 @Override
                 public int compare(Score x, Score y) {
-                    return Integer.parseInt(y.getMscore()) - Integer.parseInt(x.getMscore());
+                    return Integer.parseInt(y.getScore()) - Integer.parseInt(x.getScore());
                 }
             });
         }

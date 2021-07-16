@@ -12,16 +12,14 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.zhb.my2048.fragment.MakeSureDialog;
 import com.zhb.my2048.base.MyApplication;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.widget.Toast.LENGTH_SHORT;
 
 /**
  * @author zhb
@@ -52,44 +50,60 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             public void onCheckedChanged(CompoundButton pCompoundButton, boolean pB) {
                 try {
                     if (pB) {
-                        mp.aidl.setMute(pB);
+                        mp.mRankistAIDL.setMute(pB);
                         mp.isMute = pB;
-                        Log.i("TAG", "onCheckedChanged: " + mp.aidl.isMute());
+                        Log.i("TAG", "onCheckedChanged: " + mp.mRankistAIDL.isMute());
                     } else {
-                        mp.aidl.setMute(pB);
+                        mp.mRankistAIDL.setMute(pB);
                         mp.isMute = pB;
-                        Log.i("TAG", "onCheckedChanged: " + mp.aidl.isMute());
+                        Log.i("TAG", "onCheckedChanged: " + mp.mRankistAIDL.isMute());
                     }
                 } catch (RemoteException pE) {
                     pE.printStackTrace();
                 }
             }
         };
-        list = new ArrayList<>();
-        list.add("Time Win");
-        list.add("Score Win");
-        mAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, list);
 
         mSoundSwitch.setOnCheckedChangeListener(listener);
         mSpinnerGameMode = findViewById(R.id.game_mode_spinner);
-        //mAdapter = ArrayAdapter.createFromResource(this, R.array.spinner_item, R.layout.support_simple_spinner_dropdown_item);
+        mAdapter = ArrayAdapter.createFromResource(this, R.array.spinner_item, R.layout.support_simple_spinner_dropdown_item);
         mAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         mSpinnerGameMode.setAdapter(mAdapter);
         mClearData.setOnClickListener(this);
-
+        try {
+            mSpinnerGameMode.setSelection(mp.mRankistAIDL.getGameMode());
+        } catch (RemoteException pE) {
+            pE.printStackTrace();
+        }
         mSpinnerGameMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> pAdapterView, View pView, int pI, long pL) {
-                if (list.get(pI).equals("Time Win")) {
+                int flag = mp.GameMode;
+                if (pI == 1) {
                     mp.GameMode = 1;
-                } else if (list.get(pI).equals("Score Win")) {
+                    try {
+                        mp.mRankistAIDL.setGameMode(1);
+                    } catch (RemoteException pE) {
+                        pE.printStackTrace();
+                    }
+                } else if (pI == 0) {
                     mp.GameMode = 0;
+                    try {
+                        mp.mRankistAIDL.setGameMode(0);
+                    } catch (RemoteException pE) {
+                        pE.printStackTrace();
+                    }
+                }
+                if(flag != mp.GameMode){
+                    try {
+                        mp.mRankistAIDL.initSaveGame();
+                    } catch (RemoteException pE) {
+                        pE.printStackTrace();
+                    }
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> pAdapterView) {
-
             }
         });
     }
@@ -97,22 +111,40 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
     public void initData() throws RemoteException {
         mp = (MyApplication) getApplication();
-        mSoundSwitch.setChecked(mp.aidl.isMute());
+        mSoundSwitch.setChecked(mp.mRankistAIDL.isMute());
+    }
+
+
+    private void showMakeSureDialog() {
+        MakeSureDialog dialog = new MakeSureDialog();
+        dialog.setContent("确认删除吗？");
+        dialog.setDialogClickListener(new MakeSureDialog.onDialogClickListener() {
+            @Override
+            public void onSureClick() {
+                try {
+                    mp.mRankistAIDL.initScore();
+                    AppWidgetManager manager = AppWidgetManager.getInstance(SettingActivity.this);
+                    ComponentName provider = new ComponentName(SettingActivity.this, RankWidget.class);
+                    int[] ids = manager.getAppWidgetIds(provider);
+                    manager.notifyAppWidgetViewDataChanged(ids, R.id.rank_list);
+                } catch (RemoteException pE) {
+                    pE.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelClick() {
+//这里是取消操作
+            }
+        });
+        dialog.show(getSupportFragmentManager(), "sureDialog");
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.clear_data:
-                try {
-                    mp.aidl.initScore();
-                    AppWidgetManager manager = AppWidgetManager.getInstance(this);
-                    ComponentName provider = new ComponentName(this, RankWidget.class);
-                    int[] ids = manager.getAppWidgetIds(provider);
-                    manager.notifyAppWidgetViewDataChanged(ids, R.id.rank_list);
-                } catch (RemoteException pE) {
-                    pE.printStackTrace();
-                }
+                showMakeSureDialog();
             default:
                 break;
         }

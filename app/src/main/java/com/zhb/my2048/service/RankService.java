@@ -44,7 +44,7 @@ public class RankService extends Service {
         @Override
         public void sendScore(String score, String player, long time) throws RemoteException {
             Score score1 = new Score();
-            score1.setMscore(score);
+            score1.setScore(score);
             score1.setPlayer(player);
             score1.setTime(time);
             SQLiteHelper.with(RankService.this).insert(score1);
@@ -109,6 +109,35 @@ public class RankService extends Service {
         @Override
         public void initScore() throws RemoteException {
             SQLiteHelper.with(RankService.this).deleteTable(Score.class.getSimpleName());
+        }
+
+
+        @Override
+        public void setPauseScore(String pPauseScore) throws RemoteException {
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putString("pauseScore", pPauseScore);
+            editor.apply();
+        }
+
+        @Override
+        public String getPauseScore() throws RemoteException {
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            return sp.getString("pauseScore","0");
+        }
+
+        @Override
+        public void setGameMode(int GameMode) throws RemoteException {
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putInt("GameMode", GameMode);
+            editor.apply();
+        }
+
+        @Override
+        public int getGameMode() throws RemoteException {
+            sp = getSharedPreferences("sp_score", MODE_PRIVATE);
+            return sp.getInt("GameMode",0);
         }
 
     };
